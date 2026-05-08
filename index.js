@@ -15,8 +15,8 @@ const {
 } = require("discord.js");
 
 const fs = require("fs");
-const QRCode = require("qrcode");
 
+// ===== CLIENT =====
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -75,7 +75,7 @@ const PRODUCTS = {
     stock: "adr_1ob",
     role: "1502285208097915001",
     channel: "1502267573465513994",
-    icon: "https://cdn.discordapp.com/attachments/1488240958712709291/1502281691493040268/3kdSKZKXxfTWvzAcGEuzJyoY72AAAAAElFTkSuQmCC.png"
+    icon: "https://cdn.discordapp.com/attachments/1488240958712709291/1502281691493040268/img.png"
   },
 
   adr_vv: {
@@ -85,7 +85,7 @@ const PRODUCTS = {
     stock: "adr_vv",
     role: "1502285273990697070",
     channel: "1502267673428496424",
-    icon: "https://cdn.discordapp.com/attachments/1488240958712709291/1502281691493040268/3kdSKZKXxfTWvzAcGEuzJyoY72AAAAAElFTkSuQmCC.png"
+    icon: "https://cdn.discordapp.com/attachments/1488240958712709291/1502281691493040268/img.png"
   }
 
 };
@@ -164,32 +164,16 @@ async function updateShopEmbed() {
     .setTimestamp();
 
   const row = new ActionRowBuilder().addComponents(
-
-    new ButtonBuilder()
-      .setCustomId("buy")
-      .setLabel("🛒 Buy")
-      .setStyle(ButtonStyle.Success),
-
-    new ButtonBuilder()
-      .setCustomId("deposit")
-      .setLabel("💳 Nạp Tiền")
-      .setStyle(ButtonStyle.Primary),
-
-    new ButtonBuilder()
-      .setCustomId("balance")
-      .setLabel("💰 Số Dư")
-      .setStyle(ButtonStyle.Secondary)
-
+    new ButtonBuilder().setCustomId("buy").setLabel("🛒 Buy").setStyle(ButtonStyle.Success),
+    new ButtonBuilder().setCustomId("deposit").setLabel("💳 Nạp Tiền").setStyle(ButtonStyle.Primary),
+    new ButtonBuilder().setCustomId("balance").setLabel("💰 Số Dư").setStyle(ButtonStyle.Secondary)
   );
 
   const messages = await channel.messages.fetch({ limit: 10 });
   const old = messages.find(m => m.author.id === client.user.id);
 
-  if (old) {
-    await old.edit({ embeds: [embed], components: [row] });
-  } else {
-    await channel.send({ embeds: [embed], components: [row] });
-  }
+  if (old) await old.edit({ embeds: [embed], components: [row] });
+  else await channel.send({ embeds: [embed], components: [row] });
 }
 
 // ================= READY =================
@@ -213,8 +197,6 @@ client.once(Events.ClientReady, async () => {
 
 client.on(Events.InteractionCreate, async interaction => {
 
-  // ================= BUTTON =================
-
   if (interaction.isButton()) {
 
     if (interaction.customId === "buy") {
@@ -229,23 +211,31 @@ client.on(Events.InteractionCreate, async interaction => {
         ]);
 
       return interaction.reply({
-        embeds: [new EmbedBuilder().setTitle("🛒 MUA HÀNG")],
         components: [new ActionRowBuilder().addComponents(menu)],
         ephemeral: true
       });
     }
 
-    // ================= DEPOSIT (CHỈ SỬA Ở ĐÂY) =================
+    if (interaction.customId === "balance") {
+
+      const users = loadUsers();
+      if (!users[interaction.user.id]) users[interaction.user.id] = { balance: 0 };
+
+      return interaction.reply({
+        content: `💰 ${users[interaction.user.id].balance.toLocaleString()}đ`,
+        ephemeral: true
+      });
+    }
 
     if (interaction.customId === "deposit") {
 
       const modal = new ModalBuilder()
         .setCustomId("deposit_modal")
-        .setTitle("💳 NẠP TIỀN");
+        .setTitle("💳 Nạp tiền");
 
       const amount = new TextInputBuilder()
         .setCustomId("amount")
-        .setLabel("Nhập số tiền muốn nạp")
+        .setLabel("Nhập số tiền")
         .setStyle(TextInputStyle.Short)
         .setRequired(true);
 
@@ -253,21 +243,9 @@ client.on(Events.InteractionCreate, async interaction => {
 
       return interaction.showModal(modal);
     }
-
-    if (interaction.customId === "balance") {
-
-      const users = loadUsers();
-
-      if (!users[interaction.user.id]) users[interaction.user.id] = { balance: 0 };
-
-      return interaction.reply({
-        content: `💰 Số dư: ${users[interaction.user.id].balance.toLocaleString()}đ`,
-        ephemeral: true
-      });
-    }
   }
 
-  // ================= MODAL QR (CHỈ THÊM) =================
+  // ================= MODAL (CHỈ FIX QR) =================
 
   if (interaction.isModalSubmit()) {
 
@@ -276,34 +254,30 @@ client.on(Events.InteractionCreate, async interaction => {
       const amount = parseInt(interaction.fields.getTextInputValue("amount"));
 
       if (!amount || amount <= 0) {
-        return interaction.reply({
-          content: "❌ Số tiền không hợp lệ",
-          ephemeral: true
-        });
+        return interaction.reply({ content: "❌ Sai số tiền", ephemeral: true });
       }
 
-      const qrContent = `NQKSHOP|${interaction.user.id}|${amount}`;
+      // 🔥 ONLY FIX QR HERE
+      const bank = "VIETINBANK";
+      const account = "105884390640";
 
-      const qrBuffer = await QRCode.toBuffer(qrContent);
+      const qr = `https://img.vietqr.io/image/${bank}-${account}-compact2.png?amount=${amount}&addInfo=${interaction.user.id}`;
 
       const embed = new EmbedBuilder()
         .setTitle("💳 QR NẠP TIỀN")
         .setDescription(`
-👤 ID: ${interaction.user.id}
-💰 Số tiền: ${amount.toLocaleString()}đ
-📌 Nội dung: ${qrContent}
+🏦 VIETINBANK
+💰 ${amount.toLocaleString()}đ
+📝 Nội dung: ${interaction.user.id}
 `)
-        .setImage("attachment://qr.png");
+        .setImage(qr);
 
       return interaction.reply({
         embeds: [embed],
-        files: [{ attachment: qrBuffer, name: "qr.png" }],
         ephemeral: true
       });
     }
   }
-
-  // ================= SELECT MENU (GIỮ NGUYÊN) =================
 
   if (interaction.isStringSelectMenu()) {
 
