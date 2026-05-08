@@ -1,15 +1,12 @@
 {
-  "name": "nqk-shop",
+  "name": "nqk-webhook",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "webhook.js",
   "scripts": {
-    "start": "node index.js",
-    "webhook": "node webhook.js"
+    "start": "node webhook.js"
   },
   "dependencies": {
-    "axios": "^1.9.0",
     "body-parser": "^1.20.3",
-    "discord.js": "^14.21.0",
     "dotenv": "^16.5.0",
     "express": "^4.21.2"
   }
