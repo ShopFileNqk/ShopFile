@@ -108,6 +108,20 @@ function saveStock(data) {
   fs.writeFileSync("./stock.json", JSON.stringify(data, null, 2));
 }
 
+// ================= 💰 ADD MONEY (THÊM MỚI - KHÔNG ĐỤNG CODE CŨ) =================
+
+function addMoney(userId, amount) {
+  const users = loadUsers();
+
+  if (!users[userId]) {
+    users[userId] = { balance: 0 };
+  }
+
+  users[userId].balance += Number(amount);
+
+  saveUsers(users);
+}
+
 // ================= SHOP EMBED (GIỮ NGUYÊN 100%) =================
 
 async function updateShopEmbed() {
@@ -245,19 +259,12 @@ client.on(Events.InteractionCreate, async interaction => {
     }
   }
 
-  // ================= MODAL (CHỈ FIX QR) =================
-
   if (interaction.isModalSubmit()) {
 
     if (interaction.customId === "deposit_modal") {
 
       const amount = parseInt(interaction.fields.getTextInputValue("amount"));
 
-      if (!amount || amount <= 0) {
-        return interaction.reply({ content: "❌ Sai số tiền", ephemeral: true });
-      }
-
-      // 🔥 ONLY FIX QR HERE
       const bank = "VIETINBANK";
       const account = "105884390640";
 
@@ -265,11 +272,7 @@ client.on(Events.InteractionCreate, async interaction => {
 
       const embed = new EmbedBuilder()
         .setTitle("💳 QR NẠP TIỀN")
-        .setDescription(`
-🏦 VIETINBANK
-💰 ${amount.toLocaleString()}đ
-📝 Nội dung: ${interaction.user.id}
-`)
+        .setDescription(`💰 ${amount.toLocaleString()}đ\nID: ${interaction.user.id}`)
         .setImage(qr);
 
       return interaction.reply({
@@ -326,5 +329,34 @@ client.on(Events.InteractionCreate, async interaction => {
   }
 
 });
+
+// ================= 🚨 WEBHOOK AUTO BANK (THÊM MỚI) =================
+
+const express = require("express");
+const app = express();
+
+app.use(express.json());
+
+app.post("/vietinbank", (req, res) => {
+
+  const { userId, amount } = req.body;
+
+  if (!userId || !amount) return res.send("missing data");
+
+  // 💰 CỘNG TIỀN
+  addMoney(userId, amount);
+
+  client.users.fetch(userId)
+    .then(u => u.send(`✅ Nạp thành công +${amount}đ`))
+    .catch(() => {});
+
+  res.send("ok");
+});
+
+app.listen(8080, () => {
+  console.log("WEBHOOK RUNNING");
+});
+
+// ================= LOGIN =================
 
 client.login(process.env.TOKEN);
