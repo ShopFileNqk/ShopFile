@@ -1,13 +1,16 @@
 {
-  "name": "nqk-webhook",
+  "name": "nqk-shop",
   "version": "1.0.0",
-  "main": "webhook.js",
+  "description": "NQK Shop Premium Bot",
+  "main": "index.js",
   "scripts": {
-    "start": "node webhook.js"
+    "start": "node index.js",
+    "webhook": "node webhook.js"
   },
   "dependencies": {
-    "body-parser": "^1.20.3",
+    "discord.js": "^14.21.0",
     "dotenv": "^16.5.0",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "body-parser": "^1.20.3"
   }
 }
