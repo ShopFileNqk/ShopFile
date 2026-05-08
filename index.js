@@ -156,8 +156,8 @@ async function updateShopEmbed() {
 🔒 Bảo mật tuyệt đối
 
 `)
-    .setThumbnail("https://link-thumbnail")
-    .setImage("https://link-banner")
+    .setThumbnail("https://cdn.discordapp.com/attachments/1488240958712709291/1500447316044156948/IMG_0441.png?ex=69f877f5&is=69f72675&hm=dc7ac209d4d3275689c806d2fe02dd08e076e484318767e8614c6c1ee0e2d1ea&")
+    .setImage("https://cdn.discordapp.com/attachments/1488240958712709291/1500397539742978099/IMG_4659.gif?ex=69f84999&is=69f6f819&hm=040340c069537f4776a7258461d755173fa081827364d1d3216f7b34d0d98f44&")
     .setFooter({
       text: "NQK Shop Premium"
     })
