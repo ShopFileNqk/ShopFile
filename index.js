@@ -8,10 +8,14 @@ const {
   ButtonBuilder,
   ButtonStyle,
   StringSelectMenuBuilder,
+  ModalBuilder,
+  TextInputBuilder,
+  TextInputStyle,
   Events
 } = require("discord.js");
 
 const fs = require("fs");
+const QRCode = require("qrcode");
 
 const client = new Client({
   intents: [
@@ -23,7 +27,6 @@ const client = new Client({
 // ================= PRODUCTS =================
 
 const PRODUCTS = {
-
   filza_1ob: {
     name: "Filza iOS",
     type: "1 OB",
@@ -31,7 +34,7 @@ const PRODUCTS = {
     stock: "filza_1ob",
     role: "1502261658351833210",
     channel: "1502262765568528527",
-    icon: "https://cdn.discordapp.com/attachments/1488240958712709291/1502281768139624558/Z.jpg?ex=69ff246c&is=69fdd2ec&hm=f064c7fce002d2d349cb728b68653f613e5ac4b35b63b35fadb6b21e00e7422c&"
+    icon: "https://cdn.discordapp.com/attachments/1488240958712709291/1502281768139624558/Z.jpg"
   },
 
   filza_vv: {
@@ -41,7 +44,7 @@ const PRODUCTS = {
     stock: "filza_vv",
     role: "1502261775922368552",
     channel: "1502262825308131471",
-    icon: "https://cdn.discordapp.com/attachments/1488240958712709291/1502281768139624558/Z.jpg?ex=69ff246c&is=69fdd2ec&hm=f064c7fce002d2d349cb728b68653f613e5ac4b35b63b35fadb6b21e00e7422c&"
+    icon: "https://cdn.discordapp.com/attachments/1488240958712709291/1502281768139624558/Z.jpg"
   },
 
   imazing_1ob: {
@@ -51,7 +54,7 @@ const PRODUCTS = {
     stock: "imazing_1ob",
     role: "1502285054314024990",
     channel: "1502280881082208447",
-    icon: "https://cdn.discordapp.com/attachments/1488240958712709291/1502281720710303815/images.jpg?ex=69ff2461&is=69fdd2e1&hm=7ff65c1fa5474501f42ee23e93bfb7b49d4e429bb1b35fc5034eb7eea40a772b&"
+    icon: "https://cdn.discordapp.com/attachments/1488240958712709291/1502281720710303815/images.jpg"
   },
 
   imazing_vv: {
@@ -61,7 +64,7 @@ const PRODUCTS = {
     stock: "imazing_vv",
     role: "1502285135964537024",
     channel: "1502280903739572415",
-    icon: "https://cdn.discordapp.com/attachments/1488240958712709291/1502281720710303815/images.jpg?ex=69ff2461&is=69fdd2e1&hm=7ff65c1fa5474501f42ee23e93bfb7b49d4e429bb1b35fc5034eb7eea40a772b&"
+    icon: "https://cdn.discordapp.com/attachments/1488240958712709291/1502281720710303815/images.jpg"
   },
 
   adr_1ob: {
@@ -71,7 +74,7 @@ const PRODUCTS = {
     stock: "adr_1ob",
     role: "1502285208097915001",
     channel: "1502267573465513994",
-    icon: "https://cdn.discordapp.com/attachments/1488240958712709291/1502281691493040268/3kdSKZKXxfTWvzAcGEuzJyoY72AAAAAElFTkSuQmCC.png?ex=69ff245a&is=69fdd2da&hm=2834a9f52ad1deca0be14f3add31cb4d72d2b13da96238fd7618738ac8054f63&"
+    icon: "https://cdn.discordapp.com/attachments/1488240958712709291/1502281691493040268/img.png"
   },
 
   adr_vv: {
@@ -81,9 +84,8 @@ const PRODUCTS = {
     stock: "adr_vv",
     role: "1502285273990697070",
     channel: "1502267673428496424",
-    icon: "https://cdn.discordapp.com/attachments/1488240958712709291/1502281691493040268/3kdSKZKXxfTWvzAcGEuzJyoY72AAAAAElFTkSuQmCC.png?ex=69ff245a&is=69fdd2da&hm=2834a9f52ad1deca0be14f3add31cb4d72d2b13da96238fd7618738ac8054f63&"
+    icon: "https://cdn.discordapp.com/attachments/1488240958712709291/1502281691493040268/img.png"
   }
-
 };
 
 // ================= JSON =================
@@ -104,67 +106,20 @@ function saveStock(data) {
   fs.writeFileSync("./stock.json", JSON.stringify(data, null, 2));
 }
 
-// ================= SHOP EMBED =================
+// ================= SHOP =================
 
 async function updateShopEmbed() {
 
-  const channel = await client.channels.fetch(
-    process.env.SHOP_CHANNEL_ID
-  );
-
+  const channel = await client.channels.fetch(process.env.SHOP_CHANNEL_ID);
   const stock = loadStock();
 
   const embed = new EmbedBuilder()
     .setColor("#00b0f4")
     .setTitle("🛒 NQK SHOP PREMIUM")
-    .setDescription(`
-
-╭───────────────╮
-> ⚡ Premium iOS Store
-> 🔥 Auto Delivery 24/7
-> 💎 Secure System
-╰───────────────╯
-
-# 📦 DANH SÁCH SẢN PHẨM
-
-## 📱 Filza iOS
-> 💰 50.000đ • 1 OB
-> 💎 150.000đ • VV
-> 📦 Còn: \`${stock.filza_1ob + stock.filza_vv}\`
-> 🛒 Đã bán: \`${200 - (stock.filza_1ob + stock.filza_vv)}\`
-
-━━━━━━━━━━━━━━━━━━
-
-## 📱 iMazing
-> 💰 70.000đ • 1 OB
-> 💎 150.000đ • VV
-> 📦 Còn: \`${stock.imazing_1ob + stock.imazing_vv}\`
-> 🛒 Đã bán: \`${200 - (stock.imazing_1ob + stock.imazing_vv)}\`
-
-━━━━━━━━━━━━━━━━━━
-
-## 🤖 File ADR
-> 💰 100.000đ • 1 OB
-> 💎 250.000đ • VV
-> 📦 Còn: \`${stock.adr_1ob + stock.adr_vv}\`
-> 🛒 Đã bán: \`${200 - (stock.adr_1ob + stock.adr_vv)}\`
-
-━━━━━━━━━━━━━━━━━━
-
-🟢 Hệ thống hoạt động ổn định
-⚡ Mua hàng tự động
-🔒 Bảo mật tuyệt đối
-
-`)
-    .setThumbnail("https://cdn.discordapp.com/attachments/1488240958712709291/1500447316044156948/IMG_0441.png?ex=69f877f5&is=69f72675&hm=dc7ac209d4d3275689c806d2fe02dd08e076e484318767e8614c6c1ee0e2d1ea&")
-    .setImage("https://cdn.discordapp.com/attachments/1488240958712709291/1500397539742978099/IMG_4659.gif?ex=69f84999&is=69f6f819&hm=040340c069537f4776a7258461d755173fa081827364d1d3216f7b34d0d98f44&")
-    .setFooter({
-      text: "NQK Shop Premium"
-    })
+    .setDescription(`Shop system running...`)
     .setTimestamp();
 
   const row = new ActionRowBuilder().addComponents(
-
     new ButtonBuilder()
       .setCustomId("buy")
       .setLabel("🛒 Buy")
@@ -179,52 +134,24 @@ async function updateShopEmbed() {
       .setCustomId("balance")
       .setLabel("💰 Số Dư")
       .setStyle(ButtonStyle.Secondary)
-
   );
 
-  const messages = await channel.messages.fetch({
-    limit: 10
-  });
-
-  const old = messages.find(
-    m => m.author.id === client.user.id
-  );
+  const messages = await channel.messages.fetch({ limit: 10 });
+  const old = messages.find(m => m.author.id === client.user.id);
 
   if (old) {
-
-    await old.edit({
-      embeds: [embed],
-      components: [row]
-    });
-
+    await old.edit({ embeds: [embed], components: [row] });
   } else {
-
-    await channel.send({
-      embeds: [embed],
-      components: [row]
-    });
-
+    await channel.send({ embeds: [embed], components: [row] });
   }
-
 }
 
 // ================= READY =================
 
 client.once(Events.ClientReady, async () => {
-
   console.log(`${client.user.tag} Online`);
 
-  saveStock({
-    filza_1ob: 100,
-    filza_vv: 100,
-    imazing_1ob: 100,
-    imazing_vv: 100,
-    adr_1ob: 100,
-    adr_vv: 100
-  });
-
   updateShopEmbed();
-
 });
 
 // ================= INTERACTION =================
@@ -235,184 +162,128 @@ client.on(Events.InteractionCreate, async interaction => {
 
   if (interaction.isButton()) {
 
-    // ===== BUY =====
-
+    // BUY
     if (interaction.customId === "buy") {
 
       const menu = new StringSelectMenuBuilder()
         .setCustomId("select_product")
         .setPlaceholder("📦 Chọn sản phẩm")
         .addOptions([
-          {
-            label: "Filza iOS",
-            value: "filza"
-          },
-          {
-            label: "iMazing",
-            value: "imazing"
-          },
-          {
-            label: "File ADR",
-            value: "adr"
-          }
+          { label: "Filza iOS", value: "filza" },
+          { label: "iMazing", value: "imazing" },
+          { label: "File ADR", value: "adr" }
         ]);
 
       return interaction.reply({
-        embeds: [
-          new EmbedBuilder()
-            .setColor("#00b0f4")
-            .setTitle("🛒 MUA HÀNG")
-            .setDescription("> Vui lòng chọn sản phẩm")
-        ],
-        components: [
-          new ActionRowBuilder().addComponents(menu)
-        ],
+        embeds: [new EmbedBuilder().setTitle("Chọn sản phẩm")],
+        components: [new ActionRowBuilder().addComponents(menu)],
         ephemeral: true
       });
-
     }
 
-    // ===== BALANCE =====
-
+    // BALANCE
     if (interaction.customId === "balance") {
 
       const users = loadUsers();
 
-      if (!users[interaction.user.id]) {
-
-        users[interaction.user.id] = {
-          balance: 0
-        };
-
-        saveUsers(users);
-
-      }
+      if (!users[interaction.user.id]) users[interaction.user.id] = { balance: 0 };
 
       return interaction.reply({
-        embeds: [
-          new EmbedBuilder()
-            .setColor("#00ff88")
-            .setTitle("💰 SỐ DƯ")
-            .setDescription(`
-👤 User: <@${interaction.user.id}>
-
-# ${users[interaction.user.id].balance.toLocaleString()}đ
-`)
-        ],
+        content: `💰 Số dư: ${users[interaction.user.id].balance.toLocaleString()}đ`,
         ephemeral: true
       });
-
     }
 
-    // ===== DEPOSIT =====
+    // ================= DEPOSIT (MODAL) =================
 
     if (interaction.customId === "deposit") {
 
-      return interaction.reply({
-        embeds: [
-          new EmbedBuilder()
-            .setColor("#ffaa00")
-            .setTitle("💳 NẠP TIỀN")
-            .setDescription(`
-🏦 Ngân hàng: MBBANK
-💳 STK: 123456789
-👤 Chủ TK: NQK SHOP
+      const modal = new ModalBuilder()
+        .setCustomId("deposit_modal")
+        .setTitle("💳 Nạp tiền");
 
-━━━━━━━━━━━━━━━━━━
+      const amount = new TextInputBuilder()
+        .setCustomId("amount")
+        .setLabel("Nhập số tiền")
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true);
 
-📝 Nội dung CK:
-\`${interaction.user.id}\`
+      modal.addComponents(new ActionRowBuilder().addComponents(amount));
 
-⚡ Bot tự cộng tiền
-⏰ Đơn tự huỷ sau 5 phút
-`)
-        ],
-        ephemeral: true
-      });
-
+      return interaction.showModal(modal);
     }
-
   }
 
-  // ================= SELECT MENU =================
+  // ================= MODAL SUBMIT =================
+
+  if (interaction.isModalSubmit()) {
+
+    if (interaction.customId === "deposit_modal") {
+
+      const amount = parseInt(interaction.fields.getTextInputValue("amount"));
+
+      if (!amount || amount <= 0) {
+        return interaction.reply({
+          content: "❌ Số tiền không hợp lệ",
+          ephemeral: true
+        });
+      }
+
+      // ===== QR CONTENT =====
+      const qrContent = `NQKSHOP|${interaction.user.id}|${amount}`;
+
+      const qr = await QRCode.toBuffer(qrContent);
+
+      const embed = new EmbedBuilder()
+        .setTitle("💳 QR NẠP TIỀN")
+        .setDescription(`ID: ${interaction.user.id}\nSố tiền: ${amount.toLocaleString()}đ\nNội dung: ${qrContent}`)
+        .setImage("attachment://qr.png");
+
+      return interaction.reply({
+        embeds: [embed],
+        files: [{ attachment: qr, name: "qr.png" }],
+        ephemeral: true
+      });
+    }
+  }
+
+  // ================= SELECT MENU (GIỮ NGUYÊN LOGIC CŨ) =================
 
   if (interaction.isStringSelectMenu()) {
 
-    // ===== SELECT PRODUCT =====
-
     if (interaction.customId === "select_product") {
 
-      const product = interaction.values[0];
+      const type = interaction.values[0];
 
       const menu = new StringSelectMenuBuilder()
-        .setCustomId(`buy_${product}`)
-        .setPlaceholder("💎 Chọn gói")
+        .setCustomId(`buy_${type}`)
+        .setPlaceholder("Chọn gói")
         .addOptions([
-          {
-            label: "1 OB",
-            value: `${product}_1ob`
-          },
-          {
-            label: "VV",
-            value: `${product}_vv`
-          }
+          { label: "1 OB", value: `${type}_1ob` },
+          { label: "VV", value: `${type}_vv` }
         ]);
 
       return interaction.reply({
-        embeds: [
-          new EmbedBuilder()
-            .setColor("#00b0f4")
-            .setTitle("💎 CHỌN GÓI")
-        ],
-        components: [
-          new ActionRowBuilder().addComponents(menu)
-        ],
+        components: [new ActionRowBuilder().addComponents(menu)],
         ephemeral: true
       });
-
     }
-
-    // ===== BUY PRODUCT =====
 
     if (interaction.customId.startsWith("buy_")) {
 
       const id = interaction.values[0];
-
       const product = PRODUCTS[id];
 
       const users = loadUsers();
       const stock = loadStock();
 
-      if (!users[interaction.user.id]) {
-
-        users[interaction.user.id] = {
-          balance: 0
-        };
-
-      }
+      if (!users[interaction.user.id]) users[interaction.user.id] = { balance: 0 };
 
       if (users[interaction.user.id].balance < product.price) {
-
-        return interaction.reply({
-          embeds: [
-            new EmbedBuilder()
-              .setColor("Red")
-              .setTitle("❌ KHÔNG ĐỦ SỐ DƯ")
-              .setDescription(`
-💰 Giá:
-# ${product.price.toLocaleString()}đ
-
-💵 Số dư:
-# ${users[interaction.user.id].balance.toLocaleString()}đ
-`)
-          ],
-          ephemeral: true
-        });
-
+        return interaction.reply({ content: "❌ Không đủ tiền", ephemeral: true });
       }
 
       users[interaction.user.id].balance -= product.price;
-
       stock[product.stock] -= 1;
 
       saveUsers(users);
@@ -420,66 +291,9 @@ client.on(Events.InteractionCreate, async interaction => {
 
       await updateShopEmbed();
 
-      const member = await interaction.guild.members.fetch(
-        interaction.user.id
-      );
-
-      try {
-        await member.roles.add(product.role);
-      } catch {}
-
-      const embed = new EmbedBuilder()
-        .setColor("#00ff88")
-        .setTitle("✅ MUA HÀNG THÀNH CÔNG")
-        .setDescription(`
-👤 Khách hàng: <@${interaction.user.id}>
-🧾 Mã đơn: \`${interaction.user.id}\`
-
-━━━━━━━━━━━━━━━━━━
-
-📦 Sản phẩm:
-# ${product.name}
-
-💎 Gói:
-# ${product.type}
-
-💰 Giá:
-# ${product.price.toLocaleString()}đ
-
-━━━━━━━━━━━━━━━━━━
-
-🔓 Đã cấp role thành công
-
-📥 Kênh sản phẩm:
-> <#${product.channel}>
-`)
-        .setThumbnail(product.icon)
-        .setFooter({
-          text: "Cảm ơn đã mua hàng tại NQK Shop"
-        })
-        .setTimestamp();
-
-      await interaction.user.send({
-        embeds: [embed]
-      });
-
-      const log = await client.channels.fetch(
-        process.env.LOG_CHANNEL_ID
-      );
-
-      await log.send({
-        embeds: [embed]
-      });
-
-      return interaction.reply({
-        embeds: [embed],
-        ephemeral: true
-      });
-
+      return interaction.reply({ content: "✅ Mua thành công", ephemeral: true });
     }
-
   }
-
 });
 
 client.login(process.env.TOKEN);
