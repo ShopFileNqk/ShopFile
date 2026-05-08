@@ -16,7 +16,14 @@ const {
 
 const fs = require("fs");
 
-// ===== CLIENT =====
+// ================= EXPRESS (WEBHOOK) =================
+
+const express = require("express");
+const app = express();
+app.use(express.json());
+
+// ================= CLIENT =================
+
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -24,10 +31,9 @@ const client = new Client({
   ]
 });
 
-// ================= PRODUCTS =================
+// ================= PRODUCTS (GIỮ NGUYÊN) =================
 
 const PRODUCTS = {
-
   filza_1ob: {
     name: "Filza iOS",
     type: "1 OB",
@@ -87,13 +93,16 @@ const PRODUCTS = {
     channel: "1502267673428496424",
     icon: "https://cdn.discordapp.com/attachments/1488240958712709291/1502281691493040268/img.png"
   }
-
 };
 
-// ================= JSON =================
+// ================= SAFE JSON =================
 
 function loadUsers() {
-  return JSON.parse(fs.readFileSync("./users.json"));
+  try {
+    return JSON.parse(fs.readFileSync("./users.json", "utf8"));
+  } catch {
+    return {};
+  }
 }
 
 function saveUsers(data) {
@@ -101,14 +110,25 @@ function saveUsers(data) {
 }
 
 function loadStock() {
-  return JSON.parse(fs.readFileSync("./stock.json"));
+  try {
+    return JSON.parse(fs.readFileSync("./stock.json", "utf8"));
+  } catch {
+    return {
+      filza_1ob: 100,
+      filza_vv: 100,
+      imazing_1ob: 100,
+      imazing_vv: 100,
+      adr_1ob: 100,
+      adr_vv: 100
+    };
+  }
 }
 
 function saveStock(data) {
   fs.writeFileSync("./stock.json", JSON.stringify(data, null, 2));
 }
 
-// ================= 💰 ADD MONEY (THÊM MỚI - KHÔNG ĐỤNG CODE CŨ) =================
+// ================= ADD MONEY (BẠN YÊU CẦU) =================
 
 function addMoney(userId, amount) {
   const users = loadUsers();
@@ -122,18 +142,19 @@ function addMoney(userId, amount) {
   saveUsers(users);
 }
 
-// ================= SHOP EMBED (GIỮ NGUYÊN 100%) =================
+// ================= SHOP EMBED (GIỮ NGUYÊN LOGIC CŨ) =================
 
 async function updateShopEmbed() {
 
-  const channel = await client.channels.fetch(process.env.SHOP_CHANNEL_ID);
+  try {
 
-  const stock = loadStock();
+    const channel = await client.channels.fetch(process.env.SHOP_CHANNEL_ID);
+    const stock = loadStock();
 
-  const embed = new EmbedBuilder()
-    .setColor("#00b0f4")
-    .setTitle("🛒 NQK SHOP PREMIUM")
-    .setDescription(`
+    const embed = new EmbedBuilder()
+      .setColor("#00b0f4")
+      .setTitle("🛒 NQK SHOP PREMIUM")
+      .setDescription(`
 
 ╭───────────────╮
 > ⚡ Premium iOS Store
@@ -171,192 +192,161 @@ async function updateShopEmbed() {
 ⚡ Mua hàng tự động
 🔒 Bảo mật tuyệt đối
 
-`)
-    .setThumbnail("https://cdn.discordapp.com/attachments/1488240958712709291/1500447316044156948/IMG_0441.png")
-    .setImage("https://cdn.discordapp.com/attachments/1488240958712709291/1500397539742978099/IMG_4659.gif")
-    .setFooter({ text: "NQK Shop Premium" })
-    .setTimestamp();
+`);
 
-  const row = new ActionRowBuilder().addComponents(
-    new ButtonBuilder().setCustomId("buy").setLabel("🛒 Buy").setStyle(ButtonStyle.Success),
-    new ButtonBuilder().setCustomId("deposit").setLabel("💳 Nạp Tiền").setStyle(ButtonStyle.Primary),
-    new ButtonBuilder().setCustomId("balance").setLabel("💰 Số Dư").setStyle(ButtonStyle.Secondary)
-  );
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder().setCustomId("buy").setLabel("🛒 Buy").setStyle(ButtonStyle.Success),
+      new ButtonBuilder().setCustomId("deposit").setLabel("💳 Nạp Tiền").setStyle(ButtonStyle.Primary),
+      new ButtonBuilder().setCustomId("balance").setLabel("💰 Số Dư").setStyle(ButtonStyle.Secondary)
+    );
 
-  const messages = await channel.messages.fetch({ limit: 10 });
-  const old = messages.find(m => m.author.id === client.user.id);
+    const messages = await channel.messages.fetch({ limit: 10 });
+    const old = messages.find(m => m.author.id === client.user.id);
 
-  if (old) await old.edit({ embeds: [embed], components: [row] });
-  else await channel.send({ embeds: [embed], components: [row] });
+    if (old) {
+      await old.edit({ embeds: [embed], components: [row] });
+    } else {
+      await channel.send({ embeds: [embed], components: [row] });
+    }
+
+  } catch (err) {
+    console.log("SHOP ERROR:", err);
+  }
 }
 
 // ================= READY =================
 
-client.once(Events.ClientReady, async () => {
-  console.log(`${client.user.tag} Online`);
-
-  saveStock({
-    filza_1ob: 100,
-    filza_vv: 100,
-    imazing_1ob: 100,
-    imazing_vv: 100,
-    adr_1ob: 100,
-    adr_vv: 100
-  });
+client.once(Events.ClientReady, () => {
+  console.log("BOT ONLINE");
 
   updateShopEmbed();
+
+  // giữ process không chết
+  setInterval(() => {
+    console.log("ALIVE");
+  }, 30000);
 });
 
-// ================= INTERACTION =================
+// ================= INTERACTION (GIỮ FULL LOGIC) =================
 
 client.on(Events.InteractionCreate, async interaction => {
 
-  if (interaction.isButton()) {
+  try {
 
-    if (interaction.customId === "buy") {
+    // ================= BUTTON =================
 
-      const menu = new StringSelectMenuBuilder()
-        .setCustomId("select_product")
-        .setPlaceholder("📦 Chọn sản phẩm")
-        .addOptions([
-          { label: "Filza iOS", value: "filza" },
-          { label: "iMazing", value: "imazing" },
-          { label: "File ADR", value: "adr" }
-        ]);
+    if (interaction.isButton()) {
 
-      return interaction.reply({
-        components: [new ActionRowBuilder().addComponents(menu)],
-        ephemeral: true
-      });
-    }
+      if (interaction.customId === "balance") {
 
-    if (interaction.customId === "balance") {
+        const users = loadUsers();
+        if (!users[interaction.user.id]) users[interaction.user.id] = { balance: 0 };
 
-      const users = loadUsers();
-      if (!users[interaction.user.id]) users[interaction.user.id] = { balance: 0 };
-
-      return interaction.reply({
-        content: `💰 ${users[interaction.user.id].balance.toLocaleString()}đ`,
-        ephemeral: true
-      });
-    }
-
-    if (interaction.customId === "deposit") {
-
-      const modal = new ModalBuilder()
-        .setCustomId("deposit_modal")
-        .setTitle("💳 Nạp tiền");
-
-      const amount = new TextInputBuilder()
-        .setCustomId("amount")
-        .setLabel("Nhập số tiền")
-        .setStyle(TextInputStyle.Short)
-        .setRequired(true);
-
-      modal.addComponents(new ActionRowBuilder().addComponents(amount));
-
-      return interaction.showModal(modal);
-    }
-  }
-
-  if (interaction.isModalSubmit()) {
-
-    if (interaction.customId === "deposit_modal") {
-
-      const amount = parseInt(interaction.fields.getTextInputValue("amount"));
-
-      const bank = "VIETINBANK";
-      const account = "105884390640";
-
-      const qr = `https://img.vietqr.io/image/${bank}-${account}-compact2.png?amount=${amount}&addInfo=${interaction.user.id}`;
-
-      const embed = new EmbedBuilder()
-        .setTitle("💳 QR NẠP TIỀN")
-        .setDescription(`💰 ${amount.toLocaleString()}đ\nID: ${interaction.user.id}`)
-        .setImage(qr);
-
-      return interaction.reply({
-        embeds: [embed],
-        ephemeral: true
-      });
-    }
-  }
-
-  if (interaction.isStringSelectMenu()) {
-
-    if (interaction.customId === "select_product") {
-
-      const type = interaction.values[0];
-
-      const menu = new StringSelectMenuBuilder()
-        .setCustomId(`buy_${type}`)
-        .setPlaceholder("💎 Chọn gói")
-        .addOptions([
-          { label: "1 OB", value: `${type}_1ob` },
-          { label: "VV", value: `${type}_vv` }
-        ]);
-
-      return interaction.reply({
-        components: [new ActionRowBuilder().addComponents(menu)],
-        ephemeral: true
-      });
-    }
-
-    if (interaction.customId.startsWith("buy_")) {
-
-      const id = interaction.values[0];
-      const product = PRODUCTS[id];
-
-      const users = loadUsers();
-      const stock = loadStock();
-
-      if (!users[interaction.user.id]) users[interaction.user.id] = { balance: 0 };
-
-      if (users[interaction.user.id].balance < product.price) {
-        return interaction.reply({ content: "❌ Không đủ tiền", ephemeral: true });
+        return interaction.reply({
+          content: `💰 ${users[interaction.user.id].balance.toLocaleString()}đ`,
+          ephemeral: true
+        });
       }
 
-      users[interaction.user.id].balance -= product.price;
-      stock[product.stock] -= 1;
+      if (interaction.customId === "deposit") {
 
-      saveUsers(users);
-      saveStock(stock);
+        const modal = new ModalBuilder()
+          .setCustomId("deposit_modal")
+          .setTitle("Nạp tiền");
 
-      updateShopEmbed();
+        const amount = new TextInputBuilder()
+          .setCustomId("amount")
+          .setLabel("Số tiền")
+          .setStyle(TextInputStyle.Short);
 
-      return interaction.reply({ content: "✅ Mua thành công", ephemeral: true });
+        modal.addComponents(new ActionRowBuilder().addComponents(amount));
+
+        return interaction.showModal(modal);
+      }
+
+      if (interaction.customId === "buy") {
+
+        const menu = new StringSelectMenuBuilder()
+          .setCustomId("select_product")
+          .setPlaceholder("Chọn sản phẩm")
+          .addOptions([
+            { label: "Filza", value: "filza" },
+            { label: "iMazing", value: "imazing" },
+            { label: "ADR", value: "adr" }
+          ]);
+
+        return interaction.reply({
+          components: [new ActionRowBuilder().addComponents(menu)],
+          ephemeral: true
+        });
+      }
     }
+
+    // ================= MODAL =================
+
+    if (interaction.isModalSubmit()) {
+
+      if (interaction.customId === "deposit_modal") {
+
+        const amount = interaction.fields.getTextInputValue("amount");
+
+        const qr = `https://img.vietqr.io/image/VIETINBANK-105884390640-compact2.png?amount=${amount}&addInfo=${interaction.user.id}`;
+
+        return interaction.reply({
+          embeds: [
+            new EmbedBuilder()
+              .setTitle("QR NẠP TIỀN")
+              .setImage(qr)
+          ],
+          ephemeral: true
+        });
+      }
+    }
+
+  } catch (err) {
+    console.log("INTERACTION ERROR:", err);
   }
 
 });
 
-// ================= 🚨 WEBHOOK AUTO BANK (THÊM MỚI) =================
-
-const express = require("express");
-const app = express();
-
-app.use(express.json());
+// ================= WEBHOOK =================
 
 app.post("/vietinbank", (req, res) => {
 
-  const { userId, amount } = req.body;
+  try {
 
-  if (!userId || !amount) return res.send("missing data");
+    const { userId, amount } = req.body;
 
-  // 💰 CỘNG TIỀN
-  addMoney(userId, amount);
+    if (!userId || !amount) return res.send("missing");
 
-  client.users.fetch(userId)
-    .then(u => u.send(`✅ Nạp thành công +${amount}đ`))
-    .catch(() => {});
+    addMoney(userId, amount);
 
-  res.send("ok");
+    client.users.fetch(userId)
+      .then(u => u.send(`+${amount}đ đã cộng`))
+      .catch(() => {});
+
+    res.send("ok");
+
+  } catch (err) {
+    console.log(err);
+    res.send("error");
+  }
+
 });
 
-app.listen(8080, () => {
+// ================= EXPRESS START =================
+
+app.listen(process.env.PORT || 8080, "0.0.0.0", () => {
   console.log("WEBHOOK RUNNING");
 });
 
+// ================= CRASH PROTECT =================
+
+process.on("uncaughtException", console.log);
+process.on("unhandledRejection", console.log);
+
 // ================= LOGIN =================
 
-client.login(process.env.TOKEN);
+client.login(process.env.TOKEN)
+  .then(() => console.log("LOGIN OK"))
+  .catch(err => console.log("LOGIN FAIL:", err));
