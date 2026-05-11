@@ -16,14 +16,6 @@ const {
 
 const fs = require("fs");
 
-// ================= EXPRESS (WEBHOOK) =================
-
-const express = require("express");
-const app = express();
-app.use(express.json());
-
-// ================= CLIENT =================
-
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -31,322 +23,777 @@ const client = new Client({
   ]
 });
 
-// ================= PRODUCTS (GIỮ NGUYÊN) =================
+const SHOP_CHANNEL = "1502260846754267248";
+const LOG_CHANNEL = "1502260922733953155";
 
-const PRODUCTS = {
-  filza_1ob: {
-    name: "Filza iOS",
-    type: "1 OB",
-    price: 50000,
-    stock: "filza_1ob",
-    role: "1502261658351833210",
-    channel: "1502262765568528527",
-    icon: "https://cdn.discordapp.com/attachments/1488240958712709291/1502281768139624558/Z.jpg"
+const THUMBNAIL =
+  "https://i.imgur.com/yourthumbnail.png";
+
+const IMAGE =
+  "https://i.imgur.com/yourimage.gif";
+
+const BANK = "Vietinbank";
+const STK = "105884390640";
+
+const balancesFile = "./balances.json";
+
+if (!fs.existsSync(balancesFile)) {
+  fs.writeFileSync(balancesFile, "{}");
+}
+
+function getBalances() {
+  return JSON.parse(fs.readFileSync(balancesFile));
+}
+
+function saveBalances(data) {
+  fs.writeFileSync(
+    balancesFile,
+    JSON.stringify(data, null, 2)
+  );
+}
+
+const stock = {
+  filza: {
+    remain: 100,
+    sold: 0
   },
 
-  filza_vv: {
-    name: "Filza iOS",
-    type: "VV",
-    price: 150000,
-    stock: "filza_vv",
-    role: "1502261775922368552",
-    channel: "1502262825308131471",
-    icon: "https://cdn.discordapp.com/attachments/1488240958712709291/1502281768139624558/Z.jpg"
+  imazing: {
+    remain: 100,
+    sold: 0
   },
 
-  imazing_1ob: {
-    name: "iMazing",
-    type: "1 OB",
-    price: 70000,
-    stock: "imazing_1ob",
-    role: "1502285054314024990",
-    channel: "1502280881082208447",
-    icon: "https://cdn.discordapp.com/attachments/1488240958712709291/1502281720710303815/images.jpg"
-  },
-
-  imazing_vv: {
-    name: "iMazing",
-    type: "VV",
-    price: 150000,
-    stock: "imazing_vv",
-    role: "1502285135964537024",
-    channel: "1502280903739572415",
-    icon: "https://cdn.discordapp.com/attachments/1488240958712709291/1502281720710303815/images.jpg"
-  },
-
-  adr_1ob: {
-    name: "File ADR",
-    type: "1 OB",
-    price: 100000,
-    stock: "adr_1ob",
-    role: "1502285208097915001",
-    channel: "1502267573465513994",
-    icon: "https://cdn.discordapp.com/attachments/1488240958712709291/1502281691493040268/img.png"
-  },
-
-  adr_vv: {
-    name: "File ADR",
-    type: "VV",
-    price: 250000,
-    stock: "adr_vv",
-    role: "1502285273990697070",
-    channel: "1502267673428496424",
-    icon: "https://cdn.discordapp.com/attachments/1488240958712709291/1502281691493040268/img.png"
+  adr: {
+    remain: 100,
+    sold: 0
   }
 };
 
-// ================= SAFE JSON =================
+const products = {
+  filza: {
+    name: "Filza iOS",
 
-function loadUsers() {
-  try {
-    return JSON.parse(fs.readFileSync("./users.json", "utf8"));
-  } catch {
-    return {};
+    prices: {
+      "50000": {
+        label: "1 OB",
+        role: "1502261658351833210",
+        channel: "1502262765568528527"
+      },
+
+      "150000": {
+        label: "Vĩnh Viễn",
+        role: "1502261775922368552",
+        channel: "1502262825308131471"
+      }
+    }
+  },
+
+  imazing: {
+    name: "iMazing",
+
+    prices: {
+      "70000": {
+        label: "1 OB",
+        role: "1502285054314024990",
+        channel: "1502280881082208447"
+      },
+
+      "150000": {
+        label: "Vĩnh Viễn",
+        role: "1502285135964537024",
+        channel: "1502280903739572415"
+      }
+    }
+  },
+
+  adr: {
+    name: "File ADR",
+
+    prices: {
+      "100000": {
+        label: "1 OB",
+        role: "1502285208097915001",
+        channel: "1502267573465513994"
+      },
+
+      "250000": {
+        label: "Vĩnh Viễn",
+        role: "1502285273990697070",
+        channel: "1502267673428496424"
+      }
+    }
   }
-}
+};
 
-function saveUsers(data) {
-  fs.writeFileSync("./users.json", JSON.stringify(data, null, 2));
-}
+let shopMessage;
 
-function loadStock() {
-  try {
-    return JSON.parse(fs.readFileSync("./stock.json", "utf8"));
-  } catch {
-    return {
-      filza_1ob: 100,
-      filza_vv: 100,
-      imazing_1ob: 100,
-      imazing_vv: 100,
-      adr_1ob: 100,
-      adr_vv: 100
-    };
-  }
-}
+async function sendShopEmbed() {
 
-function saveStock(data) {
-  fs.writeFileSync("./stock.json", JSON.stringify(data, null, 2));
-}
+  const channel = await client.channels.fetch(
+    SHOP_CHANNEL
+  );
 
-// ================= ADD MONEY (BẠN YÊU CẦU) =================
-
-function addMoney(userId, amount) {
-  const users = loadUsers();
-
-  if (!users[userId]) {
-    users[userId] = { balance: 0 };
-  }
-
-  users[userId].balance += Number(amount);
-
-  saveUsers(users);
-}
-
-// ================= SHOP EMBED (GIỮ NGUYÊN LOGIC CŨ) =================
-
-async function updateShopEmbed() {
-
-  try {
-
-    const channel = await client.channels.fetch(process.env.SHOP_CHANNEL_ID);
-    const stock = loadStock();
-
-    const embed = new EmbedBuilder()
-      .setColor("#00b0f4")
-      .setTitle("🛒 NQK SHOP PREMIUM")
-      .setDescription(`
-
-╭───────────────╮
-> ⚡ Premium iOS Store
-> 🔥 Auto Delivery 24/7
-> 💎 Secure System
-╰───────────────╯
-
-# 📦 DANH SÁCH SẢN PHẨM
-
-## 📱 Filza iOS
-> 💰 50.000đ • 1 OB
-> 💎 150.000đ • VV
-> 📦 Còn: \`${stock.filza_1ob + stock.filza_vv}\`
-> 🛒 Đã bán: \`${200 - (stock.filza_1ob + stock.filza_vv)}\`
+  const embed = new EmbedBuilder()
+    .setColor("#00d4ff")
+    .setTitle("🛒 NQK SHOP PREMIUM")
+    .setDescription(`
+╭・💎 **SHOP PREMIUM IOS**
+╰・Tự động • Nhanh • Uy tín
 
 ━━━━━━━━━━━━━━━━━━
 
-## 📱 iMazing
-> 💰 70.000đ • 1 OB
-> 💎 150.000đ • VV
-> 📦 Còn: \`${stock.imazing_1ob + stock.imazing_vv}\`
-> 🛒 Đã bán: \`${200 - (stock.imazing_1ob + stock.imazing_vv)}\`
+### 📦 Filza iOS
+> 💰 50.000₫ ・1 OB
+> 💰 150.000₫ ・VV
+> 📈 Đã bán: ${stock.filza.sold}
+> 📦 Còn lại: ${stock.filza.remain}
 
 ━━━━━━━━━━━━━━━━━━
 
-## 🤖 File ADR
-> 💰 100.000đ • 1 OB
-> 💎 250.000đ • VV
-> 📦 Còn: \`${stock.adr_1ob + stock.adr_vv}\`
-> 🛒 Đã bán: \`${200 - (stock.adr_1ob + stock.adr_vv)}\`
+### 📦 iMazing
+> 💰 70.000₫ ・1 OB
+> 💰 150.000₫ ・VV
+> 📈 Đã bán: ${stock.imazing.sold}
+> 📦 Còn lại: ${stock.imazing.remain}
 
 ━━━━━━━━━━━━━━━━━━
 
-🟢 Hệ thống hoạt động ổn định
-⚡ Mua hàng tự động
-🔒 Bảo mật tuyệt đối
+### 📦 File ADR
+> 💰 100.000₫ ・1 OB
+> 💰 250.000₫ ・VV
+> 📈 Đã bán: ${stock.adr.sold}
+> 📦 Còn lại: ${stock.adr.remain}
 
-`);
+━━━━━━━━━━━━━━━━━━
 
-    const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder().setCustomId("buy").setLabel("🛒 Buy").setStyle(ButtonStyle.Success),
-      new ButtonBuilder().setCustomId("deposit").setLabel("💳 Nạp Tiền").setStyle(ButtonStyle.Primary),
-      new ButtonBuilder().setCustomId("balance").setLabel("💰 Số Dư").setStyle(ButtonStyle.Secondary)
+> ⚡ Mua hàng tự động 24/7
+> 🔥 Hỗ trợ nhanh chóng
+`)
+    .setThumbnail(THUMBNAIL)
+    .setImage(IMAGE)
+    .setFooter({
+      text: "NQK SHOP PREMIUM"
+    });
+
+  const row = new ActionRowBuilder()
+    .addComponents(
+      new ButtonBuilder()
+        .setCustomId("buy")
+        .setLabel("🛒 Buy")
+        .setStyle(ButtonStyle.Success),
+
+      new ButtonBuilder()
+        .setCustomId("nap")
+        .setLabel("💳 Nạp Tiền")
+        .setStyle(ButtonStyle.Primary),
+
+      new ButtonBuilder()
+        .setCustomId("balance")
+        .setLabel("💰 Số Dư")
+        .setStyle(ButtonStyle.Secondary)
     );
 
-    const messages = await channel.messages.fetch({ limit: 10 });
-    const old = messages.find(m => m.author.id === client.user.id);
+  const messages = await channel.messages.fetch({
+    limit: 20
+  });
 
-    if (old) {
-      await old.edit({ embeds: [embed], components: [row] });
-    } else {
-      await channel.send({ embeds: [embed], components: [row] });
-    }
+  const old = messages.find(
+    m =>
+      m.author.id === client.user.id &&
+      m.embeds.length
+  );
 
-  } catch (err) {
-    console.log("SHOP ERROR:", err);
+  if (old) {
+    shopMessage = await old.edit({
+      embeds: [embed],
+      components: [row]
+    });
+  } else {
+    shopMessage = await channel.send({
+      embeds: [embed],
+      components: [row]
+    });
   }
 }
 
-// ================= READY =================
+async function updateShopEmbed() {
+  if (!shopMessage) return;
 
-client.once(Events.ClientReady, () => {
-  console.log("BOT ONLINE");
+  const embed = EmbedBuilder.from(
+    shopMessage.embeds[0]
+  );
 
-  updateShopEmbed();
+  embed.setDescription(`
+╭・💎 **SHOP PREMIUM IOS**
+╰・Tự động • Nhanh • Uy tín
 
-  // giữ process không chết
-  setInterval(() => {
-    console.log("ALIVE");
-  }, 30000);
+━━━━━━━━━━━━━━━━━━
+
+### 📦 Filza iOS
+> 💰 50.000₫ ・1 OB
+> 💰 150.000₫ ・VV
+> 📈 Đã bán: ${stock.filza.sold}
+> 📦 Còn lại: ${stock.filza.remain}
+
+━━━━━━━━━━━━━━━━━━
+
+### 📦 iMazing
+> 💰 70.000₫ ・1 OB
+> 💰 150.000₫ ・VV
+> 📈 Đã bán: ${stock.imazing.sold}
+> 📦 Còn lại: ${stock.imazing.remain}
+
+━━━━━━━━━━━━━━━━━━
+
+### 📦 File ADR
+> 💰 100.000₫ ・1 OB
+> 💰 250.000₫ ・VV
+> 📈 Đã bán: ${stock.adr.sold}
+> 📦 Còn lại: ${stock.adr.remain}
+
+━━━━━━━━━━━━━━━━━━
+
+> ⚡ Mua hàng tự động 24/7
+> 🔥 Hỗ trợ nhanh chóng
+`);
+
+  await shopMessage.edit({
+    embeds: [embed]
+  });
+}
+
+client.once("ready", async () => {
+  console.log(`${client.user.tag} Online`);
+
+  await sendShopEmbed();
 });
 
-// ================= INTERACTION (GIỮ FULL LOGIC) =================
+client.on(
+  Events.InteractionCreate,
+  async interaction => {
 
-client.on(Events.InteractionCreate, async interaction => {
+    // BUY BUTTON
+    if (
+      interaction.isButton() &&
+      interaction.customId === "buy"
+    ) {
 
-  try {
-
-    // ================= BUTTON =================
-
-    if (interaction.isButton()) {
-
-      if (interaction.customId === "balance") {
-
-        const users = loadUsers();
-        if (!users[interaction.user.id]) users[interaction.user.id] = { balance: 0 };
-
-        return interaction.reply({
-          content: `💰 ${users[interaction.user.id].balance.toLocaleString()}đ`,
-          ephemeral: true
-        });
-      }
-
-      if (interaction.customId === "deposit") {
-
-        const modal = new ModalBuilder()
-          .setCustomId("deposit_modal")
-          .setTitle("Nạp tiền");
-
-        const amount = new TextInputBuilder()
-          .setCustomId("amount")
-          .setLabel("Số tiền")
-          .setStyle(TextInputStyle.Short);
-
-        modal.addComponents(new ActionRowBuilder().addComponents(amount));
-
-        return interaction.showModal(modal);
-      }
-
-      if (interaction.customId === "buy") {
-
-        const menu = new StringSelectMenuBuilder()
+      const menu =
+        new StringSelectMenuBuilder()
           .setCustomId("select_product")
-          .setPlaceholder("Chọn sản phẩm")
+          .setPlaceholder("📦 Chọn sản phẩm")
           .addOptions([
-            { label: "Filza", value: "filza" },
-            { label: "iMazing", value: "imazing" },
-            { label: "ADR", value: "adr" }
+            {
+              label: "Filza iOS",
+              value: "filza",
+              emoji: "💎"
+            },
+
+            {
+              label: "iMazing",
+              value: "imazing",
+              emoji: "🔥"
+            },
+
+            {
+              label: "File ADR",
+              value: "adr",
+              emoji: "📁"
+            }
           ]);
 
-        return interaction.reply({
-          components: [new ActionRowBuilder().addComponents(menu)],
-          ephemeral: true
-        });
-      }
+      return interaction.reply({
+        components: [
+          new ActionRowBuilder().addComponents(
+            menu
+          )
+        ],
+        ephemeral: true
+      });
     }
 
-    // ================= MODAL =================
+    // SELECT PRODUCT
+    if (
+      interaction.isStringSelectMenu() &&
+      interaction.customId ===
+        "select_product"
+    ) {
 
-    if (interaction.isModalSubmit()) {
+      const productKey =
+        interaction.values[0];
 
-      if (interaction.customId === "deposit_modal") {
+      const product =
+        products[productKey];
 
-        const amount = interaction.fields.getTextInputValue("amount");
+      const menu =
+        new StringSelectMenuBuilder()
+          .setCustomId(
+            `price_${productKey}`
+          )
+          .setPlaceholder("💰 Chọn gói")
+          .addOptions(
+            Object.entries(
+              product.prices
+            ).map(([price, data]) => ({
+              label: `${Number(
+                price
+              ).toLocaleString()}₫ | ${
+                data.label
+              }`,
+              value: price
+            }))
+          );
 
-        const qr = `https://img.vietqr.io/image/VIETINBANK-105884390640-compact2.png?amount=${amount}&addInfo=${interaction.user.id}`;
+      return interaction.update({
+        components: [
+          new ActionRowBuilder().addComponents(
+            menu
+          )
+        ]
+      });
+    }
+
+    // BUY PRODUCT
+    if (
+      interaction.isStringSelectMenu() &&
+      interaction.customId.startsWith(
+        "price_"
+      )
+    ) {
+
+      const productKey =
+        interaction.customId.split(
+          "_"
+        )[1];
+
+      const product =
+        products[productKey];
+
+      const price =
+        interaction.values[0];
+
+      const option =
+        product.prices[price];
+
+      const balances =
+        getBalances();
+
+      if (
+        !balances[interaction.user.id]
+      ) {
+        balances[interaction.user.id] = 0;
+      }
+
+      if (
+        balances[interaction.user.id] <
+        Number(price)
+      ) {
 
         return interaction.reply({
           embeds: [
             new EmbedBuilder()
-              .setTitle("QR NẠP TIỀN")
-              .setImage(qr)
+              .setColor("Red")
+              .setTitle(
+                "❌ Không đủ số dư"
+              )
+              .setDescription(`
+Bạn không đủ tiền để mua sản phẩm.
+
+💰 Số dư hiện tại:
+${balances[
+  interaction.user.id
+].toLocaleString()}₫
+`)
           ],
           ephemeral: true
         });
       }
+
+      balances[interaction.user.id] -=
+        Number(price);
+
+      saveBalances(balances);
+
+      stock[productKey].sold++;
+      stock[productKey].remain--;
+
+      await updateShopEmbed();
+
+      const member =
+        await interaction.guild.members.fetch(
+          interaction.user.id
+        );
+
+      await member.roles.add(
+        option.role
+      );
+
+      const productChannel =
+        interaction.guild.channels.cache.get(
+          option.channel
+        );
+
+      const orderCode = `${interaction.user.id}-${Date.now()}`;
+
+      const successEmbed =
+        new EmbedBuilder()
+          .setColor("#00ff88")
+          .setTitle(
+            "✅ MUA HÀNG THÀNH CÔNG"
+          )
+          .setThumbnail(
+            interaction.user.displayAvatarURL()
+          )
+          .addFields(
+            {
+              name: "🧾 Mã Đơn",
+              value: `\`${orderCode}\``
+            },
+
+            {
+              name: "📦 Sản phẩm",
+              value: product.name
+            },
+
+            {
+              name: "💎 Gói",
+              value: option.label
+            },
+
+            {
+              name: "💰 Giá",
+              value: `${Number(
+                price
+              ).toLocaleString()}₫`
+            },
+
+            {
+              name: "🕒 Thời Gian",
+              value: `<t:${Math.floor(
+                Date.now() / 1000
+              )}:F>`
+            },
+
+            {
+              name: "📂 Kênh Sản Phẩm",
+              value: `${productChannel}`
+            }
+          )
+          .setImage(IMAGE)
+          .setFooter({
+            text: "Cảm ơn bạn đã mua hàng ❤️"
+          });
+
+      await interaction.user.send({
+        embeds: [successEmbed]
+      });
+
+      const logChannel =
+        await client.channels.fetch(
+          LOG_CHANNEL
+        );
+
+      await logChannel.send({
+        embeds: [successEmbed]
+      });
+
+      return interaction.reply({
+        embeds: [
+          new EmbedBuilder()
+            .setColor("#00ff88")
+            .setDescription(`
+✅ Đã mua thành công **${product.name}**
+
+📩 Kiểm tra DM để nhận thông tin.
+`)
+        ],
+        ephemeral: true
+      });
     }
 
-  } catch (err) {
-    console.log("INTERACTION ERROR:", err);
+    // BALANCE
+    if (
+      interaction.isButton() &&
+      interaction.customId ===
+        "balance"
+    ) {
+
+      const balances =
+        getBalances();
+
+      const money =
+        balances[interaction.user.id] || 0;
+
+      return interaction.reply({
+        embeds: [
+          new EmbedBuilder()
+            .setColor("#00d4ff")
+            .setTitle(
+              "💰 SỐ DƯ TÀI KHOẢN"
+            )
+            .setDescription(`
+👤 ${interaction.user}
+
+💵 Số dư hiện tại:
+## ${money.toLocaleString()}₫
+`)
+        ],
+        ephemeral: true
+      });
+    }
+
+    // NAP BUTTON
+    if (
+      interaction.isButton() &&
+      interaction.customId === "nap"
+    ) {
+
+      const modal =
+        new ModalBuilder()
+          .setCustomId(
+            "nap_modal"
+          )
+          .setTitle("Nạp Tiền");
+
+      const amount =
+        new TextInputBuilder()
+          .setCustomId("money")
+          .setLabel(
+            "Nhập số tiền"
+          )
+          .setStyle(
+            TextInputStyle.Short
+          );
+
+      modal.addComponents(
+        new ActionRowBuilder().addComponents(
+          amount
+        )
+      );
+
+      return interaction.showModal(
+        modal
+      );
+    }
+
+    // MODAL NAP
+    if (
+      interaction.isModalSubmit() &&
+      interaction.customId ===
+        "nap_modal"
+    ) {
+
+      const amount =
+        interaction.fields.getTextInputValue(
+          "money"
+        );
+
+      const qr =
+        `https://img.vietqr.io/image/vietinbank-${STK}-compact2.png?amount=${amount}&addInfo=${interaction.user.id}`;
+
+      const qrEmbed =
+        new EmbedBuilder()
+          .setColor("#00d4ff")
+          .setTitle(
+            "💳 THANH TOÁN QR"
+          )
+          .setDescription(`
+🏦 Ngân hàng: ${BANK}
+💳 STK: ${STK}
+
+💰 Số tiền:
+## ${Number(
+            amount
+          ).toLocaleString()}₫
+
+📝 Nội dung:
+\`${interaction.user.id}\`
+
+⏳ Đơn tự huỷ sau 5 phút
+`)
+          .setImage(qr)
+          .setFooter({
+            text: "NQK SHOP PREMIUM"
+          });
+
+      await interaction.reply({
+        embeds: [qrEmbed],
+        ephemeral: true
+      });
+
+      const adminEmbed =
+        new EmbedBuilder()
+          .setColor("Yellow")
+          .setTitle("📥 ĐƠN NẠP")
+          .addFields(
+            {
+              name: "👤 Người Nạp",
+              value: `${interaction.user}`
+            },
+
+            {
+              name: "💰 Số Tiền",
+              value: `${Number(
+                amount
+              ).toLocaleString()}₫`
+            },
+
+            {
+              name: "🕒 Thời Gian",
+              value: `<t:${Math.floor(
+                Date.now() / 1000
+              )}:F>`
+            },
+
+            {
+              name: "📌 Trạng Thái",
+              value:
+                "⏳ Chờ duyệt"
+            }
+          )
+          .setThumbnail(
+            interaction.user.displayAvatarURL()
+          );
+
+      const row =
+        new ActionRowBuilder()
+          .addComponents(
+            new ButtonBuilder()
+              .setCustomId(
+                `accept_${interaction.user.id}_${amount}`
+              )
+              .setLabel("✅ Duyệt")
+              .setStyle(
+                ButtonStyle.Success
+              ),
+
+            new ButtonBuilder()
+              .setCustomId(
+                `deny_${interaction.user.id}`
+              )
+              .setLabel(
+                "❌ Từ Chối"
+              )
+              .setStyle(
+                ButtonStyle.Danger
+              )
+          );
+
+      const logChannel =
+        await client.channels.fetch(
+          LOG_CHANNEL
+        );
+
+      await logChannel.send({
+        embeds: [adminEmbed],
+        components: [row]
+      });
+    }
+
+    // ACCEPT
+    if (
+      interaction.isButton() &&
+      interaction.customId.startsWith(
+        "accept_"
+      )
+    ) {
+
+      if (
+        !interaction.member.roles.cache.has(
+          process.env.ADMIN_ROLE
+        )
+      ) {
+        return interaction.reply({
+          content:
+            "❌ Không có quyền",
+          ephemeral: true
+        });
+      }
+
+      const data =
+        interaction.customId.split(
+          "_"
+        );
+
+      const userId = data[1];
+
+      const amount =
+        Number(data[2]);
+
+      const balances =
+        getBalances();
+
+      if (!balances[userId]) {
+        balances[userId] = 0;
+      }
+
+      balances[userId] += amount;
+
+      saveBalances(balances);
+
+      const embed =
+        EmbedBuilder.from(
+          interaction.message.embeds[0]
+        );
+
+      embed.spliceFields(3, 1, {
+        name: "📌 Trạng Thái",
+        value: "✅ Đã duyệt"
+      });
+
+      await interaction.update({
+        embeds: [embed],
+        components: []
+      });
+
+      const user =
+        await client.users.fetch(
+          userId
+        );
+
+      await user.send({
+        embeds: [
+          new EmbedBuilder()
+            .setColor("#00ff88")
+            .setTitle(
+              "✅ NẠP TIỀN THÀNH CÔNG"
+            )
+            .setDescription(`
+💰 Bạn đã được cộng:
+
+## ${amount.toLocaleString()}₫
+
+💵 Số dư đã cập nhật.
+`)
+        ]
+      });
+    }
+
+    // DENY
+    if (
+      interaction.isButton() &&
+      interaction.customId.startsWith(
+        "deny_"
+      )
+    ) {
+
+      const embed =
+        EmbedBuilder.from(
+          interaction.message.embeds[0]
+        );
+
+      embed.spliceFields(3, 1, {
+        name: "📌 Trạng Thái",
+        value: "❌ Đã từ chối"
+      });
+
+      await interaction.update({
+        embeds: [embed],
+        components: []
+      });
+    }
+
   }
+);
 
-});
-
-// ================= WEBHOOK =================
-
-app.post("/vietinbank", (req, res) => {
-
-  try {
-
-    const { userId, amount } = req.body;
-
-    if (!userId || !amount) return res.send("missing");
-
-    addMoney(userId, amount);
-
-    client.users.fetch(userId)
-      .then(u => u.send(`+${amount}đ đã cộng`))
-      .catch(() => {});
-
-    res.send("ok");
-
-  } catch (err) {
-    console.log(err);
-    res.send("error");
-  }
-
-});
-
-// ================= EXPRESS START =================
-
-app.listen(process.env.PORT || 8080, "0.0.0.0", () => {
-  console.log("WEBHOOK RUNNING");
-});
-
-// ================= CRASH PROTECT =================
-
-process.on("uncaughtException", console.log);
-process.on("unhandledRejection", console.log);
-
-// ================= LOGIN =================
-
-client.login(process.env.TOKEN)
-  .then(() => console.log("LOGIN OK"))
-  .catch(err => console.log("LOGIN FAIL:", err));
+client.login(process.env.TOKEN);
