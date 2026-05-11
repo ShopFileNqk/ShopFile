@@ -135,34 +135,34 @@ async function sendShopEmbed() {
 
   const embed = new EmbedBuilder()
     .setColor("#00d4ff")
-    .setTitle("🛒 NQK SHOP PREMIUM")
+    .setTitle("🛒 SHOP FILE NQK")
     .setDescription(`
-╭・💎 **SHOP PREMIUM IOS**
-╰・Tự động • Nhanh • Uy tín
+╭・💎 **FULL FILE ADR/IOS**
+╰・Tự động • 24/7 • Uy tín
 
 ━━━━━━━━━━━━━━━━━━
 
-### 📦 Filza iOS
+### 🔥 Filza AntiBan 
 > 💰 50.000₫ ・1 OB
 > 💰 150.000₫ ・VV
-> 📈 Đã bán: ${stock.filza.sold}
-> 📦 Còn lại: ${stock.filza.remain}
+> 📤 Đã bán: ${stock.filza.sold}
+> 📥 Còn lại: ${stock.filza.remain}
 
 ━━━━━━━━━━━━━━━━━━
 
-### 📦 iMazing
+### 💎 iMazing AntiBan
 > 💰 70.000₫ ・1 OB
 > 💰 150.000₫ ・VV
-> 📈 Đã bán: ${stock.imazing.sold}
-> 📦 Còn lại: ${stock.imazing.remain}
+> 📤 Đã bán: ${stock.imazing.sold}
+> 📥 Còn lại: ${stock.imazing.remain}
 
 ━━━━━━━━━━━━━━━━━━
 
-### 📦 File ADR
+### 🤖 File Adr Root
 > 💰 100.000₫ ・1 OB
 > 💰 250.000₫ ・VV
-> 📈 Đã bán: ${stock.adr.sold}
-> 📦 Còn lại: ${stock.adr.remain}
+> 📤 Đã bán: ${stock.adr.sold}
+> 📥 Còn lại: ${stock.adr.remain}
 
 ━━━━━━━━━━━━━━━━━━
 
@@ -172,7 +172,7 @@ async function sendShopEmbed() {
     .setThumbnail(THUMBNAIL)
     .setImage(IMAGE)
     .setFooter({
-      text: "NQK SHOP PREMIUM"
+      text: "NQK SHOP FILE"
     });
 
   const row = new ActionRowBuilder()
@@ -184,7 +184,7 @@ async function sendShopEmbed() {
 
       new ButtonBuilder()
         .setCustomId("nap")
-        .setLabel("💳 Nạp Tiền")
+        .setLabel("💳 Nạp")
         .setStyle(ButtonStyle.Primary),
 
       new ButtonBuilder()
