@@ -27,10 +27,10 @@ const SHOP_CHANNEL = "1502260846754267248";
 const LOG_CHANNEL = "1502260922733953155";
 
 const THUMBNAIL =
-  "https://i.imgur.com/yourthumbnail.png";
+  "https://cdn.discordapp.com/attachments/1488240958712709291/1500895021161910435/IMG_0491.gif?ex=69fa18ea&is=69f8c76a&hm=080e74b7998cae2f1830ec1d1ba0af75859270b1533c03ff01a67304c56393de&";
 
 const IMAGE =
-  "https://i.imgur.com/yourimage.gif";
+  "https://cdn.discordapp.com/attachments/1488240958712709291/1500397539742978099/IMG_4659.gif?ex=69f84999&is=69f6f819&hm=040340c069537f4776a7258461d755173fa081827364d1d3216f7b34d0d98f44&";
 
 const BANK = "Vietinbank";
 const STK = "105884390640";
