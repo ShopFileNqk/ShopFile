@@ -42,7 +42,11 @@ if (!fs.existsSync(balancesFile)) {
 }
 
 function getBalances() {
-  return JSON.parse(fs.readFileSync(balancesFile));
+  try {
+    return JSON.parse(fs.readFileSync(balancesFile));
+  } catch {
+    return {};
+  }
 }
 
 function saveBalances(data) {
@@ -217,6 +221,7 @@ async function sendShopEmbed() {
 }
 
 async function updateShopEmbed() {
+
   if (!shopMessage) return;
 
   const embed = EmbedBuilder.from(
@@ -237,7 +242,7 @@ async function updateShopEmbed() {
 
 ━━━━━━━━━━━━━━━━━━
 
-### 💎 imazing iOS
+### 💎 iMazing
 > 💸 70.000₫ ・1 OB
 > 💸 150.000₫ ・VV
 > 📤 Đã bán: ${stock.imazing.sold}
@@ -245,7 +250,7 @@ async function updateShopEmbed() {
 
 ━━━━━━━━━━━━━━━━━━
 
-### 📁 File Adr Root
+### 📁 File ADR
 > 💸 100.000₫ ・1 OB
 > 💸 250.000₫ ・VV
 > 📤 Đã bán: ${stock.adr.sold}
@@ -263,137 +268,173 @@ async function updateShopEmbed() {
 }
 
 client.once("ready", async () => {
+
   console.log(`${client.user.tag} Online`);
 
-  await sendShopEmbed();
+  try {
+    await sendShopEmbed();
+  } catch (err) {
+    console.log("SEND EMBED ERROR:", err);
+  }
 });
 
 client.on(
   Events.InteractionCreate,
   async interaction => {
 
-    // BUY BUTTON
-    if (
-      interaction.isButton() &&
-      interaction.customId === "buy"
-    ) {
+    try {
 
-      const menu =
-        new StringSelectMenuBuilder()
-          .setCustomId("select_product")
-          .setPlaceholder("📦 Chọn sản phẩm")
-          .addOptions([
-            {
-              label: "Filza iOS",
-              value: "filza",
-              emoji: "🔥"
-            },
+      // BUY BUTTON
+      if (
+        interaction.isButton() &&
+        interaction.customId === "buy"
+      ) {
 
-            {
-              label: "iMazing",
-              value: "imazing",
-              emoji: "💎"
-            },
+        const menu =
+          new StringSelectMenuBuilder()
+            .setCustomId("select_product")
+            .setPlaceholder("📦 Chọn sản phẩm")
+            .addOptions([
+              {
+                label: "Filza iOS",
+                value: "filza",
+                emoji: "🔥"
+              },
 
-            {
-              label: "File ADR",
-              value: "adr",
-              emoji: "📁"
-            }
-          ]);
+              {
+                label: "iMazing",
+                value: "imazing",
+                emoji: "💎"
+              },
 
-      return interaction.reply({
-        components: [
-          new ActionRowBuilder().addComponents(
-            menu
-          )
-        ],
-        ephemeral: true
-      });
-    }
+              {
+                label: "File ADR",
+                value: "adr",
+                emoji: "📁"
+              }
+            ]);
 
-   // SELECT PRODUCT
-if (
-  interaction.isStringSelectMenu() &&
-  interaction.customId === "select_product"
-) {
+        return interaction.reply({
+          components: [
+            new ActionRowBuilder().addComponents(
+              menu
+            )
+          ],
+          ephemeral: true
+        });
+      }
 
-  await interaction.deferUpdate();
+      // SELECT PRODUCT
+      if (
+        interaction.isStringSelectMenu() &&
+        interaction.customId === "select_product"
+      ) {
 
-  const productKey = interaction.values[0];
+        await interaction.deferUpdate();
 
-  const product = products[productKey];
+        const productKey =
+          interaction.values[0];
 
-  const menu =
-    new StringSelectMenuBuilder()
-      .setCustomId(`price_${productKey}`)
-      .setPlaceholder("📌 Chọn gói")
-      .addOptions(
-        Object.entries(product.prices).map(
-          ([price, data]) => ({
-            label: `${Number(price).toLocaleString()}₫ | ${data.label}`,
-            value: price
-          })
+        const product =
+          products[productKey];
+
+        if (!product) {
+          return interaction.editReply({
+            content:
+              "❌ Không tìm thấy sản phẩm",
+            components: []
+          });
+        }
+
+        const menu =
+          new StringSelectMenuBuilder()
+            .setCustomId(
+              `price_${productKey}`
+            )
+            .setPlaceholder("📌 Chọn gói")
+            .addOptions(
+              Object.entries(
+                product.prices
+              ).map(
+                ([price, data]) => ({
+                  label: `${Number(price).toLocaleString()}₫ | ${data.label}`,
+                  value: price
+                })
+              )
+            );
+
+        return interaction.editReply({
+          components: [
+            new ActionRowBuilder().addComponents(
+              menu
+            )
+          ]
+        });
+      }
+
+      // BUY PRODUCT
+      if (
+        interaction.isStringSelectMenu() &&
+        interaction.customId.startsWith(
+          "price_"
         )
-      );
+      ) {
 
-  return interaction.editReply({
-    components: [
-      new ActionRowBuilder().addComponents(menu)
-    ]
-  });
-}
-    
-    // BUY PRODUCT
-if (
-  interaction.isStringSelectMenu() &&
-  interaction.customId.startsWith(
-    "price_"
-  )
-) {
+        await interaction.deferReply({
+          ephemeral: true
+        });
 
-  // FIX INTERACTION FAILED
-  await interaction.deferReply({
-    ephemeral: true
-  });
+        const productKey =
+          interaction.customId.replace(
+            "price_",
+            ""
+          );
 
-  const productKey =
-    interaction.customId.split(
-      "_"
-    )[1];
+        const product =
+          products[productKey];
 
-  const product =
-    products[productKey];
+        if (!product) {
+          return interaction.editReply({
+            content:
+              "❌ Sản phẩm không tồn tại"
+          });
+        }
 
-  const price =
-    interaction.values[0];
+        const price =
+          interaction.values[0];
 
-  const option =
-    product.prices[price];
+        const option =
+          product.prices[price];
 
-  const balances =
-    getBalances();
+        if (!option) {
+          return interaction.editReply({
+            content:
+              "❌ Không tìm thấy gói sản phẩm"
+          });
+        }
 
-  if (
-    !balances[interaction.user.id]
-  ) {
-    balances[interaction.user.id] = 0;
-  }
+        const balances =
+          getBalances();
 
-  // KHÔNG ĐỦ TIỀN
-  if (
-    balances[interaction.user.id] <
-    Number(price)
-  ) {
+        if (
+          !balances[interaction.user.id]
+        ) {
+          balances[interaction.user.id] = 0;
+        }
 
-    return interaction.editReply({
-      embeds: [
-        new EmbedBuilder()
-          .setColor("Red")
-          .setTitle(
-            "❌ Số dư hiện tại không đủ !"
-          )
-          .setDescription(`
+        if (
+          balances[interaction.user.id] <
+          Number(price)
+        ) {
+
+          return interaction.editReply({
+            embeds: [
+              new EmbedBuilder()
+                .setColor("Red")
+                .setTitle(
+                  "❌ Số dư hiện tại không đủ !"
+                )
+                .setDescription(`
 Bạn không đủ tiền để mua sản phẩm.
 
 🧧 Số dư của bạn:
@@ -401,414 +442,509 @@ ${balances[
   interaction.user.id
 ].toLocaleString()}₫
 `)
-      ]
-    });
-  }
-
-  // TRỪ TIỀN
-  balances[interaction.user.id] -=
-    Number(price);
-
-  saveBalances(balances);
-
-  // UPDATE STOCK
-  stock[productKey].sold++;
-  stock[productKey].remain--;
-
-  await updateShopEmbed();
-
-  // ADD ROLE
-  const member =
-    await interaction.guild.members.fetch(
-      interaction.user.id
-    );
-
-  await member.roles.add(
-    option.role
-  );
-
-  // CHANNEL FILE
-  const productChannel =
-    interaction.guild.channels.cache.get(
-      option.channel
-    );
-
-  // ORDER CODE
-  const orderCode = `${interaction.user.id}-${Date.now()}`;
-
-  // SUCCESS EMBED
-  const successEmbed =
-    new EmbedBuilder()
-      .setColor("#00ff88")
-      .setTitle(
-        "🌐 Mua File Thành Công"
-      )
-      .setThumbnail(
-        interaction.user.displayAvatarURL()
-      )
-      .addFields(
-
-        {
-          name: "👤 Người Mua",
-          value: `${interaction.user.tag} (${interaction.user.id})`
-        },
-
-        {
-          name: "🧾 Mã Đơn",
-          value: `\`${orderCode}\``
-        },
-
-        {
-          name: "📦 Sản phẩm",
-          value: product.name
-        },
-
-        {
-          name: "💎 Gói",
-          value: option.label
-        },
-
-        {
-          name: "💰 Giá",
-          value: `${Number(
-            price
-          ).toLocaleString()}₫`
-        },
-
-        {
-          name: "🕒 Thời Gian",
-          value: `<t:${Math.floor(
-            Date.now() / 1000
-          )}:F>`
-        },
-
-        {
-          name: "📂 Kênh Sản Phẩm",
-          value: `${productChannel}`
+            ]
+          });
         }
-      )
-      .setImage(IMAGE)
-      .setFooter({
-        text: "Cảm ơn bạn đã mua hàng ❤️"
-      });
 
-  // SEND DM
-  try {
-    await interaction.user.send({
-      embeds: [successEmbed]
-    });
-  } catch {
-    console.log(
-      `Không thể gửi DM cho ${interaction.user.tag}`
-    );
-  }
+        balances[interaction.user.id] -=
+          Number(price);
 
-  // LOG CHANNEL
-  const logChannel =
-    await client.channels.fetch(
-      LOG_CHANNEL
-    );
+        saveBalances(balances);
 
-  await logChannel.send({
-    embeds: [successEmbed]
-  });
+        stock[productKey].sold++;
+        stock[productKey].remain--;
 
-  // SUCCESS REPLY
-  return interaction.editReply({
-    embeds: [
-      new EmbedBuilder()
-        .setColor("#00ff88")
-        .setDescription(`
+        try {
+          await updateShopEmbed();
+        } catch (err) {
+          console.log(
+            "UPDATE SHOP ERROR:",
+            err
+          );
+        }
+
+        // MEMBER
+        const member =
+          await interaction.guild.members.fetch(
+            interaction.user.id
+          );
+
+        // ROLE
+        try {
+          await member.roles.add(
+            option.role
+          );
+        } catch (err) {
+          console.log(
+            "ROLE ERROR:",
+            err
+          );
+        }
+
+        // CHANNEL
+        const productChannel =
+          interaction.guild.channels.cache.get(
+            option.channel
+          );
+
+        const orderCode = `${interaction.user.id}-${Date.now()}`;
+
+        const successEmbed =
+          new EmbedBuilder()
+            .setColor("#00ff88")
+            .setTitle(
+              "🌐 Mua File Thành Công"
+            )
+            .setThumbnail(
+              interaction.user.displayAvatarURL()
+            )
+            .addFields(
+              {
+                name: "👤 Người Mua",
+                value: `${interaction.user.tag} (${interaction.user.id})`
+              },
+
+              {
+                name: "🧾 Mã Đơn",
+                value: `\`${orderCode}\``
+              },
+
+              {
+                name: "📦 Sản phẩm",
+                value: product.name
+              },
+
+              {
+                name: "💎 Gói",
+                value: option.label
+              },
+
+              {
+                name: "💰 Giá",
+                value: `${Number(
+                  price
+                ).toLocaleString()}₫`
+              },
+
+              {
+                name: "🕒 Thời Gian",
+                value: `<t:${Math.floor(
+                  Date.now() / 1000
+                )}:F>`
+              },
+
+              {
+                name: "📂 Kênh Sản Phẩm",
+                value:
+                  productChannel
+                    ? `${productChannel}`
+                    : "Không tìm thấy kênh"
+              }
+            )
+            .setImage(IMAGE)
+            .setFooter({
+              text:
+                "Cảm ơn bạn đã mua hàng ❤️"
+            });
+
+        // DM
+        try {
+          await interaction.user.send({
+            embeds: [successEmbed]
+          });
+        } catch (err) {
+          console.log(
+            `DM ERROR ${interaction.user.tag}`
+          );
+        }
+
+        // LOG
+        try {
+
+          const logChannel =
+            await client.channels.fetch(
+              LOG_CHANNEL
+            );
+
+          await logChannel.send({
+            embeds: [successEmbed]
+          });
+
+        } catch (err) {
+          console.log(
+            "LOG ERROR:",
+            err
+          );
+        }
+
+        return interaction.editReply({
+          embeds: [
+            new EmbedBuilder()
+              .setColor("#00ff88")
+              .setDescription(`
 ✅ Đã mua thành công **${product.name}**
 
 📩 Kiểm tra DM để nhận sản phẩm.
 `)
-    ]
-  });
-}
+          ]
+        });
+      }
 
-    // BALANCE
-    if (
-      interaction.isButton() &&
-      interaction.customId ===
-        "balance"
-    ) {
+      // BALANCE
+      if (
+        interaction.isButton() &&
+        interaction.customId ===
+          "balance"
+      ) {
 
-      const balances =
-        getBalances();
+        const balances =
+          getBalances();
 
-      const money =
-        balances[interaction.user.id] || 0;
+        const money =
+          balances[interaction.user.id] || 0;
 
-      return interaction.reply({
-        embeds: [
-          new EmbedBuilder()
-            .setColor("#00d4ff")
-            .setTitle(
-              "💰 SỐ DƯ TÀI KHOẢN"
-            )
-            .setDescription(`
+        return interaction.reply({
+          embeds: [
+            new EmbedBuilder()
+              .setColor("#00d4ff")
+              .setTitle(
+                "💰 SỐ DƯ TÀI KHOẢN"
+              )
+              .setDescription(`
 👤 ${interaction.user}
 
 💵 Số dư hiện tại:
 ## ${money.toLocaleString()}₫
 `)
-        ],
-        ephemeral: true
-      });
-    }
+          ],
+          ephemeral: true
+        });
+      }
 
-    // NAP BUTTON
-    if (
-      interaction.isButton() &&
-      interaction.customId === "nap"
-    ) {
+      // NAP BUTTON
+      if (
+        interaction.isButton() &&
+        interaction.customId === "nap"
+      ) {
 
-      const modal =
-        new ModalBuilder()
-          .setCustomId(
-            "nap_modal"
+        const modal =
+          new ModalBuilder()
+            .setCustomId(
+              "nap_modal"
+            )
+            .setTitle("Nạp Tiền");
+
+        const amount =
+          new TextInputBuilder()
+            .setCustomId("money")
+            .setLabel(
+              "Nhập số tiền"
+            )
+            .setStyle(
+              TextInputStyle.Short
+            );
+
+        modal.addComponents(
+          new ActionRowBuilder().addComponents(
+            amount
           )
-          .setTitle("Nạp Tiền");
-
-      const amount =
-        new TextInputBuilder()
-          .setCustomId("money")
-          .setLabel(
-            "Nhập số tiền"
-          )
-          .setStyle(
-            TextInputStyle.Short
-          );
-
-      modal.addComponents(
-        new ActionRowBuilder().addComponents(
-          amount
-        )
-      );
-
-      return interaction.showModal(
-        modal
-      );
-    }
-
-    // MODAL NAP
-    if (
-      interaction.isModalSubmit() &&
-      interaction.customId ===
-        "nap_modal"
-    ) {
-
-      const amount =
-        interaction.fields.getTextInputValue(
-          "money"
         );
 
-      const qr =
-        `https://img.vietqr.io/image/vietinbank-${STK}-compact2.png?amount=${amount}&addInfo=${interaction.user.id}`;
+        return interaction.showModal(
+          modal
+        );
+      }
 
-      const qrEmbed =
-        new EmbedBuilder()
-          .setColor("#00d4ff")
-          .setTitle(
-            "💳 THANH TOÁN QR"
-          )
-          .setDescription(`
+      // MODAL NAP
+      if (
+        interaction.isModalSubmit() &&
+        interaction.customId ===
+          "nap_modal"
+      ) {
+
+        const amount =
+          interaction.fields.getTextInputValue(
+            "money"
+          );
+
+        if (
+          isNaN(amount) ||
+          Number(amount) <= 0
+        ) {
+          return interaction.reply({
+            content:
+              "❌ Số tiền không hợp lệ",
+            ephemeral: true
+          });
+        }
+
+        const qr =
+          `https://img.vietqr.io/image/vietinbank-${STK}-compact2.png?amount=${amount}&addInfo=${interaction.user.id}`;
+
+        const qrEmbed =
+          new EmbedBuilder()
+            .setColor("#00d4ff")
+            .setTitle(
+              "💳 THANH TOÁN QR"
+            )
+            .setDescription(`
 🏦 Ngân hàng: ${BANK}
 💳 STK: ${STK}
 
 💰 Số tiền:
 ## ${Number(
-            amount
-          ).toLocaleString()}₫
+              amount
+            ).toLocaleString()}₫
 
 📝 Nội dung:
 \`${interaction.user.id}\`
 
 ⏳ Đơn tự huỷ sau 5 phút
 `)
-          .setImage(qr)
-          .setFooter({
-            text: "NQK SHOP PREMIUM"
-          });
+            .setImage(qr)
+            .setFooter({
+              text:
+                "NQK SHOP PREMIUM"
+            });
 
-      await interaction.reply({
-        embeds: [qrEmbed],
-        ephemeral: true
-      });
-
-      const adminEmbed =
-        new EmbedBuilder()
-          .setColor("Yellow")
-          .setTitle("📥 ĐƠN NẠP")
-          .addFields(
-            {
-              name: "👤 Người Nạp",
-              value: `${interaction.user}`
-            },
-
-            {
-              name: "💰 Số Tiền",
-              value: `${Number(
-                amount
-              ).toLocaleString()}₫`
-            },
-
-            {
-              name: "🕒 Thời Gian",
-              value: `<t:${Math.floor(
-                Date.now() / 1000
-              )}:F>`
-            },
-
-            {
-              name: "📌 Trạng Thái",
-              value:
-                "⏳ Chờ duyệt"
-            }
-          )
-          .setThumbnail(
-            interaction.user.displayAvatarURL()
-          );
-
-      const row =
-        new ActionRowBuilder()
-          .addComponents(
-            new ButtonBuilder()
-              .setCustomId(
-                `accept_${interaction.user.id}_${amount}`
-              )
-              .setLabel("✅ Duyệt")
-              .setStyle(
-                ButtonStyle.Success
-              ),
-
-            new ButtonBuilder()
-              .setCustomId(
-                `deny_${interaction.user.id}`
-              )
-              .setLabel(
-                "❌ Từ Chối"
-              )
-              .setStyle(
-                ButtonStyle.Danger
-              )
-          );
-
-      const logChannel =
-        await client.channels.fetch(
-          LOG_CHANNEL
-        );
-
-      await logChannel.send({
-        embeds: [adminEmbed],
-        components: [row]
-      });
-    }
-
-    // ACCEPT
-    if (
-      interaction.isButton() &&
-      interaction.customId.startsWith(
-        "accept_"
-      )
-    ) {
-
-      if (
-        !interaction.member.roles.cache.has(
-          process.env.ADMIN_ROLE
-        )
-      ) {
-        return interaction.reply({
-          content:
-            "❌ Không có quyền",
+        await interaction.reply({
+          embeds: [qrEmbed],
           ephemeral: true
+        });
+
+        const adminEmbed =
+          new EmbedBuilder()
+            .setColor("Yellow")
+            .setTitle("📥 ĐƠN NẠP")
+            .addFields(
+              {
+                name: "👤 Người Nạp",
+                value: `${interaction.user}`
+              },
+
+              {
+                name: "💰 Số Tiền",
+                value: `${Number(
+                  amount
+                ).toLocaleString()}₫`
+              },
+
+              {
+                name: "🕒 Thời Gian",
+                value: `<t:${Math.floor(
+                  Date.now() / 1000
+                )}:F>`
+              },
+
+              {
+                name: "📌 Trạng Thái",
+                value:
+                  "⏳ Chờ duyệt"
+              }
+            )
+            .setThumbnail(
+              interaction.user.displayAvatarURL()
+            );
+
+        const row =
+          new ActionRowBuilder()
+            .addComponents(
+              new ButtonBuilder()
+                .setCustomId(
+                  `accept_${interaction.user.id}_${amount}`
+                )
+                .setLabel(
+                  "✅ Duyệt"
+                )
+                .setStyle(
+                  ButtonStyle.Success
+                ),
+
+              new ButtonBuilder()
+                .setCustomId(
+                  `deny_${interaction.user.id}`
+                )
+                .setLabel(
+                  "❌ Từ Chối"
+                )
+                .setStyle(
+                  ButtonStyle.Danger
+                )
+            );
+
+        const logChannel =
+          await client.channels.fetch(
+            LOG_CHANNEL
+          );
+
+        await logChannel.send({
+          embeds: [adminEmbed],
+          components: [row]
         });
       }
 
-      const data =
-        interaction.customId.split(
-          "_"
-        );
+      // ACCEPT
+      if (
+        interaction.isButton() &&
+        interaction.customId.startsWith(
+          "accept_"
+        )
+      ) {
 
-      const userId = data[1];
+        if (
+          !interaction.member.roles.cache.has(
+            process.env.ADMIN_ROLE
+          )
+        ) {
+          return interaction.reply({
+            content:
+              "❌ Không có quyền",
+            ephemeral: true
+          });
+        }
 
-      const amount =
-        Number(data[2]);
+        const data =
+          interaction.customId.split(
+            "_"
+          );
 
-      const balances =
-        getBalances();
+        const userId = data[1];
 
-      if (!balances[userId]) {
-        balances[userId] = 0;
-      }
+        const amount =
+          Number(data[2]);
 
-      balances[userId] += amount;
+        const balances =
+          getBalances();
 
-      saveBalances(balances);
+        if (!balances[userId]) {
+          balances[userId] = 0;
+        }
 
-      const embed =
-        EmbedBuilder.from(
-          interaction.message.embeds[0]
-        );
+        balances[userId] += amount;
 
-      embed.spliceFields(3, 1, {
-        name: "📌 Trạng Thái",
-        value: "✅ Đã duyệt"
-      });
+        saveBalances(balances);
 
-      await interaction.update({
-        embeds: [embed],
-        components: []
-      });
+        const embed =
+          EmbedBuilder.from(
+            interaction.message.embeds[0]
+          );
 
-      const user =
-        await client.users.fetch(
-          userId
-        );
+        embed.spliceFields(3, 1, {
+          name: "📌 Trạng Thái",
+          value: "✅ Đã duyệt"
+        });
 
-      await user.send({
-        embeds: [
-          new EmbedBuilder()
-            .setColor("#00ff88")
-            .setTitle(
-              "✅ NẠP TIỀN THÀNH CÔNG"
-            )
-            .setDescription(`
+        await interaction.update({
+          embeds: [embed],
+          components: []
+        });
+
+        try {
+
+          const user =
+            await client.users.fetch(
+              userId
+            );
+
+          await user.send({
+            embeds: [
+              new EmbedBuilder()
+                .setColor(
+                  "#00ff88"
+                )
+                .setTitle(
+                  "✅ NẠP TIỀN THÀNH CÔNG"
+                )
+                .setDescription(`
 💰 Bạn đã được cộng:
 
 ## ${amount.toLocaleString()}₫
-
-💵 Kiểm tra số dư https://discord.com/channels/1110927706679427205/1502260846754267248.
 `)
-        ]
-      });
+            ]
+          });
+
+        } catch (err) {
+          console.log(
+            "SEND USER ERROR:",
+            err
+          );
+        }
+      }
+
+      // DENY
+      if (
+        interaction.isButton() &&
+        interaction.customId.startsWith(
+          "deny_"
+        )
+      ) {
+
+        const embed =
+          EmbedBuilder.from(
+            interaction.message.embeds[0]
+          );
+
+        embed.spliceFields(3, 1, {
+          name: "📌 Trạng Thái",
+          value: "❌ Đã từ chối"
+        });
+
+        await interaction.update({
+          embeds: [embed],
+          components: []
+        });
+      }
+
+    } catch (err) {
+
+      console.log("INTERACTION ERROR:");
+      console.log(err);
+
+      try {
+
+        if (
+          interaction.deferred ||
+          interaction.replied
+        ) {
+
+          await interaction.editReply({
+            content:
+              "❌ Đã xảy ra lỗi khi xử lý."
+          });
+
+        } else {
+
+          await interaction.reply({
+            content:
+              "❌ Đã xảy ra lỗi khi xử lý.",
+            ephemeral: true
+          });
+
+        }
+
+      } catch {}
     }
+  }
+);
 
-    // DENY
-    if (
-      interaction.isButton() &&
-      interaction.customId.startsWith(
-        "deny_"
-      )
-    ) {
+// ANTI CRASH
+process.on(
+  "unhandledRejection",
+  err => {
+    console.log(
+      "UNHANDLED REJECTION:",
+      err
+    );
+  }
+);
 
-      const embed =
-        EmbedBuilder.from(
-          interaction.message.embeds[0]
-        );
-
-      embed.spliceFields(3, 1, {
-        name: "📌 Trạng Thái",
-        value: "❌ Đã từ chối"
-      });
-
-      await interaction.update({
-        embeds: [embed],
-        components: []
-      });
-    }
-
+process.on(
+  "uncaughtException",
+  err => {
+    console.log(
+      "UNCAUGHT EXCEPTION:",
+      err
+    );
   }
 );
 
