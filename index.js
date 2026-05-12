@@ -647,158 +647,180 @@ ${balances[
         });
       }
 
-      // NAP
-      if (
-        interaction.isButton() &&
-        interaction.customId === "nap"
-      ) {
+      // NAP BUTTON
+if (
+  interaction.isButton() &&
+  interaction.customId === "nap"
+) {
 
-        const modal =
-          new ModalBuilder()
-            .setCustomId(
-              "nap_modal"
-            )
-            .setTitle(
-              "Nạp Tiền"
-            );
+  try {
 
-        const amount =
-          new TextInputBuilder()
-            .setCustomId("money")
-            .setLabel(
-              "Nhập số tiền"
-            )
-            .setRequired(true)
-            .setStyle(
-              TextInputStyle.Short
-            );
+    const modal =
+      new ModalBuilder()
+        .setCustomId("nap_modal")
+        .setTitle("Nạp Tiền");
 
-        modal.addComponents(
-          new ActionRowBuilder().addComponents(
-            amount
-          )
-        );
+    const amount =
+      new TextInputBuilder()
+        .setCustomId("money")
+        .setLabel("Nhập số tiền")
+        .setPlaceholder("Ví dụ: 100000")
+        .setRequired(true)
+        .setMinLength(1)
+        .setMaxLength(10)
+        .setStyle(TextInputStyle.Short);
 
-        return interaction.showModal(
-          modal
-        );
-      }
+    modal.addComponents(
+      new ActionRowBuilder().addComponents(
+        amount
+      )
+    );
 
-      // MODAL NAP
-      if (
-        interaction.isModalSubmit() &&
-        interaction.customId ===
-          "nap_modal"
-      ) {
+    await interaction.showModal(modal);
 
-        const amount =
-          interaction.fields.getTextInputValue(
-            "money"
-          );
+  } catch (err) {
+    console.log(err);
 
-        if (
-          !amount ||
-          isNaN(amount) ||
-          Number(amount) <= 0
-        ) {
+    if (!interaction.replied) {
+      return interaction.reply({
+        content: "❌ Không thể mở modal.",
+        ephemeral: true
+      });
+    }
+  }
+}
 
-          return interaction.reply({
-            content:
-              "❌ Số tiền không hợp lệ",
-            ephemeral: true
-          });
-        }
+// MODAL NAP
+if (
+  interaction.isModalSubmit() &&
+  interaction.customId === "nap_modal"
+) {
 
-        const money =
-          Number(amount);
+  try {
 
-        const qr =
-          `https://img.vietqr.io/image/vietinbank-${STK}-compact2.png?amount=${money}&addInfo=${interaction.user.id}`;
+    const amount =
+      interaction.fields.getTextInputValue(
+        "money"
+      );
 
-        const qrEmbed =
+    // VALIDATE
+    if (
+      isNaN(amount) ||
+      Number(amount) <= 0
+    ) {
+      return interaction.reply({
+        embeds: [
           new EmbedBuilder()
-            .setColor("#00d4ff")
-            .setTitle(
-              "💳 THANH TOÁN QR"
-            )
-            .setDescription(`
-🏦 ${BANK}
-💳 ${STK}
+            .setColor("Red")
+            .setTitle("❌ Số tiền không hợp lệ")
+        ],
+        ephemeral: true
+      });
+    }
 
-💰 ${money.toLocaleString()}₫
+    const money = Number(amount);
+
+    const qr =
+      `https://img.vietqr.io/image/vietinbank-${STK}-compact2.png?amount=${money}&addInfo=${interaction.user.id}`;
+
+    const qrEmbed =
+      new EmbedBuilder()
+        .setColor("#00d4ff")
+        .setTitle("💳 THANH TOÁN QR")
+        .setDescription(`
+🏦 Ngân hàng: ${BANK}
+💳 STK: ${STK}
+
+💰 Số tiền:
+## ${money.toLocaleString()}₫
 
 📝 Nội dung:
 \`${interaction.user.id}\`
-`)
-            .setImage(qr);
 
-        await interaction.reply({
-          embeds: [qrEmbed],
-          ephemeral: true
+⏳ Đơn tự huỷ sau 5 phút
+`)
+        .setImage(qr)
+        .setFooter({
+          text: "NQK SHOP PREMIUM"
         });
 
-        const adminEmbed =
-          new EmbedBuilder()
-            .setColor("Yellow")
-            .setTitle("📥 ĐƠN NẠP")
-            .addFields(
-              {
-                name: "👤 User",
-                value:
-                  `${interaction.user.tag}`
-              },
+    await interaction.reply({
+      embeds: [qrEmbed],
+      ephemeral: true
+    });
 
-              {
-                name: "💰 Tiền",
-                value:
-                  `${money.toLocaleString()}₫`
-              },
+    const adminEmbed =
+      new EmbedBuilder()
+        .setColor("Yellow")
+        .setTitle("📥 ĐƠN NẠP")
+        .addFields(
+          {
+            name: "👤 Người Nạp",
+            value: `${interaction.user.tag}`
+          },
 
-              {
-                name: "📌 Trạng Thái",
-                value:
-                  "⏳ Chờ duyệt"
-              }
-            );
+          {
+            name: "💰 Số Tiền",
+            value: `${money.toLocaleString()}₫`
+          },
 
-        const row =
-          new ActionRowBuilder()
-            .addComponents(
+          {
+            name: "🕒 Thời Gian",
+            value: `<t:${Math.floor(
+              Date.now() / 1000
+            )}:F>`
+          },
 
-              new ButtonBuilder()
-                .setCustomId(
-                  `accept_${interaction.user.id}_${money}`
-                )
-                .setLabel("✅ Duyệt")
-                .setStyle(
-                  ButtonStyle.Success
-                ),
+          {
+            name: "📌 Trạng Thái",
+            value: "⏳ Chờ duyệt"
+          }
+        )
+        .setThumbnail(
+          interaction.user.displayAvatarURL()
+        );
 
-              new ButtonBuilder()
-                .setCustomId(
-                  `deny_${interaction.user.id}`
-                )
-                .setLabel(
-                  "❌ Từ Chối"
-                )
-                .setStyle(
-                  ButtonStyle.Danger
-                )
-            );
+    const row =
+      new ActionRowBuilder()
+        .addComponents(
+          new ButtonBuilder()
+            .setCustomId(
+              `accept_${interaction.user.id}_${money}`
+            )
+            .setLabel("✅ Duyệt")
+            .setStyle(ButtonStyle.Success),
 
-        const logChannel =
-          await client.channels.fetch(
-            LOG_CHANNEL
-          );
+          new ButtonBuilder()
+            .setCustomId(
+              `deny_${interaction.user.id}`
+            )
+            .setLabel("❌ Từ Chối")
+            .setStyle(ButtonStyle.Danger)
+        );
 
-        if (logChannel) {
+    const logChannel =
+      await client.channels.fetch(
+        LOG_CHANNEL
+      );
 
-          await logChannel.send({
-            embeds: [adminEmbed],
-            components: [row]
-          });
-        }
-      }
+    await logChannel.send({
+      embeds: [adminEmbed],
+      components: [row]
+    });
+
+  } catch (err) {
+
+    console.log(err);
+
+    if (!interaction.replied) {
+      await interaction.reply({
+        content:
+          "❌ Lỗi xử lý nạp tiền.",
+        ephemeral: true
+      });
+    }
+  }
+}
 
       // ACCEPT
       if (
