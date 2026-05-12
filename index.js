@@ -313,46 +313,38 @@ client.on(
     }
 
     // SELECT PRODUCT
-    if (
-      interaction.isStringSelectMenu() &&
-      interaction.customId ===
-        "select_product"
-    ) {
+   // SELECT PRODUCT
+if (
+  interaction.isStringSelectMenu() &&
+  interaction.customId === "select_product"
+) {
 
-      const productKey =
-        interaction.values[0];
+  await interaction.deferUpdate();
 
-      const product =
-        products[productKey];
+  const productKey = interaction.values[0];
 
-      const menu =
-        new StringSelectMenuBuilder()
-          .setCustomId(
-            `price_${productKey}`
-          )
-          .setPlaceholder("📌 Chọn gói")
-          .addOptions(
-            Object.entries(
-              product.prices
-            ).map(([price, data]) => ({
-              label: `${Number(
-                price
-              ).toLocaleString()}₫ | ${
-                data.label
-              }`,
-              value: price
-            }))
-          );
+  const product = products[productKey];
 
-      return interaction.update({
-        components: [
-          new ActionRowBuilder().addComponents(
-            menu
-          )
-        ]
-      });
-    }
+  const menu =
+    new StringSelectMenuBuilder()
+      .setCustomId(`price_${productKey}`)
+      .setPlaceholder("📌 Chọn gói")
+      .addOptions(
+        Object.entries(product.prices).map(
+          ([price, data]) => ({
+            label: `${Number(price).toLocaleString()}₫ | ${data.label}`,
+            value: price
+          })
+        )
+      );
 
+  return interaction.editReply({
+    components: [
+      new ActionRowBuilder().addComponents(menu)
+    ]
+  });
+}
+    
     // BUY PRODUCT
     if (
       interaction.isStringSelectMenu() &&
@@ -436,53 +428,59 @@ ${balances[
       const orderCode = `${interaction.user.id}-${Date.now()}`;
 
       const successEmbed =
-        new EmbedBuilder()
-          .setColor("#00ff88")
-          .setTitle(
-            "🌐 Mua File Thành Công"
-          )
-          .setThumbnail(
-            interaction.user.displayAvatarURL()
-          )
-          .addFields(
-            {
-              name: "🧾 Mã Đơn",
-              value: `\`${orderCode}\``
-            },
+  new EmbedBuilder()
+    .setColor("#00ff88")
+    .setTitle(
+      "🌐 Mua File Thành Công"
+    )
+    .setThumbnail(
+      interaction.user.displayAvatarURL()
+    )
+    .addFields(
 
-            {
-              name: "📦 Sản phẩm",
-              value: product.name
-            },
+      {
+        name: "👤 Người Mua",
+        value: `${interaction.user.tag}`
+      },
 
-            {
-              name: "💎 Gói",
-              value: option.label
-            },
+      {
+        name: "🧾 Mã Đơn",
+        value: `\`${orderCode}\``
+      },
 
-            {
-              name: "💰 Giá",
-              value: `${Number(
-                price
-              ).toLocaleString()}₫`
-            },
+      {
+        name: "📦 Sản phẩm",
+        value: product.name
+      },
 
-            {
-              name: "🕒 Thời Gian",
-              value: `<t:${Math.floor(
-                Date.now() / 1000
-              )}:F>`
-            },
+      {
+        name: "💎 Gói",
+        value: option.label
+      },
 
-            {
-              name: "📂 Kênh Sản Phẩm",
-              value: `${productChannel}`
-            }
-          )
-          .setImage(IMAGE)
-          .setFooter({
-            text: "Cảm ơn bạn đã mua hàng ❤️"
-          });
+      {
+        name: "💰 Giá",
+        value: `${Number(
+          price
+        ).toLocaleString()}₫`
+      },
+
+      {
+        name: "🕒 Thời Gian",
+        value: `<t:${Math.floor(
+          Date.now() / 1000
+        )}:F>`
+      },
+
+      {
+        name: "📂 Kênh Sản Phẩm",
+        value: `${productChannel}`
+      }
+    )
+    .setImage(IMAGE)
+    .setFooter({
+      text: "Cảm ơn bạn đã mua hàng ❤️"
+    });
 
       await interaction.user.send({
         embeds: [successEmbed]
