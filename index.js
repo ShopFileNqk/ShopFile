@@ -345,49 +345,55 @@ if (
 }
     
     // BUY PRODUCT
-    if (
-      interaction.isStringSelectMenu() &&
-      interaction.customId.startsWith(
-        "price_"
-      )
-    ) {
+if (
+  interaction.isStringSelectMenu() &&
+  interaction.customId.startsWith(
+    "price_"
+  )
+) {
 
-      const productKey =
-        interaction.customId.split(
-          "_"
-        )[1];
+  // FIX INTERACTION FAILED
+  await interaction.deferReply({
+    ephemeral: true
+  });
 
-      const product =
-        products[productKey];
+  const productKey =
+    interaction.customId.split(
+      "_"
+    )[1];
 
-      const price =
-        interaction.values[0];
+  const product =
+    products[productKey];
 
-      const option =
-        product.prices[price];
+  const price =
+    interaction.values[0];
 
-      const balances =
-        getBalances();
+  const option =
+    product.prices[price];
 
-      if (
-        !balances[interaction.user.id]
-      ) {
-        balances[interaction.user.id] = 0;
-      }
+  const balances =
+    getBalances();
 
-      if (
-        balances[interaction.user.id] <
-        Number(price)
-      ) {
+  if (
+    !balances[interaction.user.id]
+  ) {
+    balances[interaction.user.id] = 0;
+  }
 
-        return interaction.reply({
-          embeds: [
-            new EmbedBuilder()
-              .setColor("Red")
-              .setTitle(
-                "❌ Số dư hiện tại không đủ !"
-              )
-              .setDescription(`
+  // KHÔNG ĐỦ TIỀN
+  if (
+    balances[interaction.user.id] <
+    Number(price)
+  ) {
+
+    return interaction.editReply({
+      embeds: [
+        new EmbedBuilder()
+          .setColor("Red")
+          .setTitle(
+            "❌ Số dư hiện tại không đủ !"
+          )
+          .setDescription(`
 Bạn không đủ tiền để mua sản phẩm.
 
 🧧 Số dư của bạn:
@@ -395,118 +401,131 @@ ${balances[
   interaction.user.id
 ].toLocaleString()}₫
 `)
-          ],
-          ephemeral: true
-        });
-      }
-
-      balances[interaction.user.id] -=
-        Number(price);
-
-      saveBalances(balances);
-
-      stock[productKey].sold++;
-      stock[productKey].remain--;
-
-      await updateShopEmbed();
-
-      const member =
-        await interaction.guild.members.fetch(
-          interaction.user.id
-        );
-
-      await member.roles.add(
-        option.role
-      );
-
-      const productChannel =
-        interaction.guild.channels.cache.get(
-          option.channel
-        );
-
-      const orderCode = `${interaction.user.id}-${Date.now()}`;
-
-      const successEmbed =
-  new EmbedBuilder()
-    .setColor("#00ff88")
-    .setTitle(
-      "🌐 Mua File Thành Công"
-    )
-    .setThumbnail(
-      interaction.user.displayAvatarURL()
-    )
-    .addFields(
-
-      {
-        name: "👤 Người Mua",
-        value: `${interaction.user.tag}`
-      },
-
-      {
-        name: "🧾 Mã Đơn",
-        value: `\`${orderCode}\``
-      },
-
-      {
-        name: "📦 Sản phẩm",
-        value: product.name
-      },
-
-      {
-        name: "💎 Gói",
-        value: option.label
-      },
-
-      {
-        name: "💰 Giá",
-        value: `${Number(
-          price
-        ).toLocaleString()}₫`
-      },
-
-      {
-        name: "🕒 Thời Gian",
-        value: `<t:${Math.floor(
-          Date.now() / 1000
-        )}:F>`
-      },
-
-      {
-        name: "📂 Kênh Sản Phẩm",
-        value: `${productChannel}`
-      }
-    )
-    .setImage(IMAGE)
-    .setFooter({
-      text: "Cảm ơn bạn đã mua hàng ❤️"
+      ]
     });
+  }
 
-      await interaction.user.send({
-        embeds: [successEmbed]
+  // TRỪ TIỀN
+  balances[interaction.user.id] -=
+    Number(price);
+
+  saveBalances(balances);
+
+  // UPDATE STOCK
+  stock[productKey].sold++;
+  stock[productKey].remain--;
+
+  await updateShopEmbed();
+
+  // ADD ROLE
+  const member =
+    await interaction.guild.members.fetch(
+      interaction.user.id
+    );
+
+  await member.roles.add(
+    option.role
+  );
+
+  // CHANNEL FILE
+  const productChannel =
+    interaction.guild.channels.cache.get(
+      option.channel
+    );
+
+  // ORDER CODE
+  const orderCode = `${interaction.user.id}-${Date.now()}`;
+
+  // SUCCESS EMBED
+  const successEmbed =
+    new EmbedBuilder()
+      .setColor("#00ff88")
+      .setTitle(
+        "🌐 Mua File Thành Công"
+      )
+      .setThumbnail(
+        interaction.user.displayAvatarURL()
+      )
+      .addFields(
+
+        {
+          name: "👤 Người Mua",
+          value: `${interaction.user.tag} (${interaction.user.id})`
+        },
+
+        {
+          name: "🧾 Mã Đơn",
+          value: `\`${orderCode}\``
+        },
+
+        {
+          name: "📦 Sản phẩm",
+          value: product.name
+        },
+
+        {
+          name: "💎 Gói",
+          value: option.label
+        },
+
+        {
+          name: "💰 Giá",
+          value: `${Number(
+            price
+          ).toLocaleString()}₫`
+        },
+
+        {
+          name: "🕒 Thời Gian",
+          value: `<t:${Math.floor(
+            Date.now() / 1000
+          )}:F>`
+        },
+
+        {
+          name: "📂 Kênh Sản Phẩm",
+          value: `${productChannel}`
+        }
+      )
+      .setImage(IMAGE)
+      .setFooter({
+        text: "Cảm ơn bạn đã mua hàng ❤️"
       });
 
-      const logChannel =
-        await client.channels.fetch(
-          LOG_CHANNEL
-        );
+  // SEND DM
+  try {
+    await interaction.user.send({
+      embeds: [successEmbed]
+    });
+  } catch {
+    console.log(
+      `Không thể gửi DM cho ${interaction.user.tag}`
+    );
+  }
 
-      await logChannel.send({
-        embeds: [successEmbed]
-      });
+  // LOG CHANNEL
+  const logChannel =
+    await client.channels.fetch(
+      LOG_CHANNEL
+    );
 
-      return interaction.followUp({
-        embeds: [
-          new EmbedBuilder()
-            .setColor("#00ff88")
-            .setDescription(`
+  await logChannel.send({
+    embeds: [successEmbed]
+  });
+
+  // SUCCESS REPLY
+  return interaction.editReply({
+    embeds: [
+      new EmbedBuilder()
+        .setColor("#00ff88")
+        .setDescription(`
 ✅ Đã mua thành công **${product.name}**
 
 📩 Kiểm tra DM để nhận sản phẩm.
 `)
-        ],
-        ephemeral: true
-      });
-    }
+    ]
+  });
+}
 
     // BALANCE
     if (
