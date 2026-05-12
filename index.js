@@ -135,32 +135,32 @@ async function sendShopEmbed() {
 
   const embed = new EmbedBuilder()
     .setColor("#00d4ff")
-    .setTitle("🛒 SHOP FILE NQK")
+    .setTitle("🛒 NQK SHOP FILE")
     .setDescription(`
-╭・💎 **FULL FILE ADR/IOS**
-╰・Tự động • 24/7 • Uy tín
+╭・💎 **FILE PREMIUM**
+╰・Tự động • Nhanh • Uy tín
 
 ━━━━━━━━━━━━━━━━━━
 
-### 🔥 Filza AntiBan 
-> 💰 50.000₫ ・1 OB
-> 💰 150.000₫ ・VV
+### 🔥 Filza iOS
+> 💸 50.000₫ ・1 OB
+> 💸 150.000₫ ・VV
 > 📤 Đã bán: ${stock.filza.sold}
 > 📥 Còn lại: ${stock.filza.remain}
 
 ━━━━━━━━━━━━━━━━━━
 
-### 💎 iMazing AntiBan
-> 💰 70.000₫ ・1 OB
-> 💰 150.000₫ ・VV
+### 💎 iMazing
+> 💸 70.000₫ ・1 OB
+> 💸 150.000₫ ・VV
 > 📤 Đã bán: ${stock.imazing.sold}
 > 📥 Còn lại: ${stock.imazing.remain}
 
 ━━━━━━━━━━━━━━━━━━
 
-### 🤖 File Adr Root
-> 💰 100.000₫ ・1 OB
-> 💰 250.000₫ ・VV
+### 📁 File ADR
+> 💸 100.000₫ ・1 OB
+> 💸 250.000₫ ・VV
 > 📤 Đã bán: ${stock.adr.sold}
 > 📥 Còn lại: ${stock.adr.remain}
 
@@ -172,14 +172,14 @@ async function sendShopEmbed() {
     .setThumbnail(THUMBNAIL)
     .setImage(IMAGE)
     .setFooter({
-      text: "NQK SHOP FILE"
+      text: "NQK SHOP PREMIUM"
     });
 
   const row = new ActionRowBuilder()
     .addComponents(
       new ButtonBuilder()
         .setCustomId("buy")
-        .setLabel("🛒 Buy")
+        .setLabel("🛒 Mua")
         .setStyle(ButtonStyle.Success),
 
       new ButtonBuilder()
@@ -189,7 +189,7 @@ async function sendShopEmbed() {
 
       new ButtonBuilder()
         .setCustomId("balance")
-        .setLabel("💰 Số Dư")
+        .setLabel("🧧 Số Dư")
         .setStyle(ButtonStyle.Secondary)
     );
 
@@ -224,32 +224,32 @@ async function updateShopEmbed() {
   );
 
   embed.setDescription(`
-╭・💎 **SHOP PREMIUM IOS**
+╭・💎 **FILE PREMIUM**
 ╰・Tự động • Nhanh • Uy tín
 
 ━━━━━━━━━━━━━━━━━━
 
-### 📦 Filza iOS
-> 💰 50.000₫ ・1 OB
-> 💰 150.000₫ ・VV
-> 📈 Đã bán: ${stock.filza.sold}
-> 📦 Còn lại: ${stock.filza.remain}
+### 🔥 Filza iOS
+> 💸 50.000₫ ・1 OB
+> 💸 150.000₫ ・VV
+> 📤 Đã bán: ${stock.filza.sold}
+> 📥 Còn lại: ${stock.filza.remain}
 
 ━━━━━━━━━━━━━━━━━━
 
-### 📦 iMazing
-> 💰 70.000₫ ・1 OB
-> 💰 150.000₫ ・VV
-> 📈 Đã bán: ${stock.imazing.sold}
-> 📦 Còn lại: ${stock.imazing.remain}
+### 💎 imazing iOS
+> 💸 70.000₫ ・1 OB
+> 💸 150.000₫ ・VV
+> 📤 Đã bán: ${stock.imazing.sold}
+> 📥 Còn lại: ${stock.imazing.remain}
 
 ━━━━━━━━━━━━━━━━━━
 
-### 📦 File ADR
-> 💰 100.000₫ ・1 OB
-> 💰 250.000₫ ・VV
-> 📈 Đã bán: ${stock.adr.sold}
-> 📦 Còn lại: ${stock.adr.remain}
+### 📁 File Adr Root
+> 💸 100.000₫ ・1 OB
+> 💸 250.000₫ ・VV
+> 📤 Đã bán: ${stock.adr.sold}
+> 📥 Còn lại: ${stock.adr.remain}
 
 ━━━━━━━━━━━━━━━━━━
 
@@ -286,13 +286,13 @@ client.on(
             {
               label: "Filza iOS",
               value: "filza",
-              emoji: "💎"
+              emoji: "🔥"
             },
 
             {
               label: "iMazing",
               value: "imazing",
-              emoji: "🔥"
+              emoji: "💎"
             },
 
             {
@@ -330,7 +330,7 @@ client.on(
           .setCustomId(
             `price_${productKey}`
           )
-          .setPlaceholder("💰 Chọn gói")
+          .setPlaceholder("📌 Chọn gói")
           .addOptions(
             Object.entries(
               product.prices
@@ -394,12 +394,12 @@ client.on(
             new EmbedBuilder()
               .setColor("Red")
               .setTitle(
-                "❌ Không đủ số dư"
+                "❌ Số dư hiện tại không đủ !"
               )
               .setDescription(`
 Bạn không đủ tiền để mua sản phẩm.
 
-💰 Số dư hiện tại:
+🧧 Số dư của bạn:
 ${balances[
   interaction.user.id
 ].toLocaleString()}₫
@@ -439,7 +439,7 @@ ${balances[
         new EmbedBuilder()
           .setColor("#00ff88")
           .setTitle(
-            "✅ MUA HÀNG THÀNH CÔNG"
+            "🌐 Mua File Thành Công"
           )
           .setThumbnail(
             interaction.user.displayAvatarURL()
@@ -504,7 +504,7 @@ ${balances[
             .setDescription(`
 ✅ Đã mua thành công **${product.name}**
 
-📩 Kiểm tra DM để nhận thông tin.
+📩 Kiểm tra DM để nhận sản phẩm.
 `)
         ],
         ephemeral: true
@@ -763,7 +763,7 @@ ${balances[
 
 ## ${amount.toLocaleString()}₫
 
-💵 Số dư đã cập nhật.
+💵 Kiểm tra số dư https://discord.com/channels/1110927706679427205/1502260846754267248.
 `)
         ]
       });
