@@ -312,7 +312,6 @@ client.on(
       });
     }
 
-    // SELECT PRODUCT
    // SELECT PRODUCT
 if (
   interaction.isStringSelectMenu() &&
@@ -495,7 +494,7 @@ ${balances[
         embeds: [successEmbed]
       });
 
-      return interaction.reply({
+      return interaction.followUp({
         embeds: [
           new EmbedBuilder()
             .setColor("#00ff88")
