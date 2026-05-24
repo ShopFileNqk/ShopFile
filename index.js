@@ -270,7 +270,6 @@ function createShopEmbed() {
 
     .setTimestamp();
 };
-}
 
 // ================= SHOP BUTTON =================
 function createMainButtons() {
