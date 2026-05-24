@@ -192,68 +192,72 @@ let shopMessage = null;
 
 // ================= CREATE SHOP EMBED =================
 function createShopEmbed() {
+
   return new EmbedBuilder()
 
-    .setColor("#00d4ff")
+    .setColor("#5865F2")
 
     .setAuthor({
       name: "NQK SHOP PREMIUM",
       iconURL: THUMBNAIL
     })
 
-    .setTitle("🛒 SHOP FILE AUTO BUY")
+    .setTitle("🛒 SHOP FILE IOS • AUTO 24/7")
 
     .setDescription(`
-╭━━━ 💎 **SHOP FILE PREMIUM** ━━━╮
-> ⚡ Tự động 24/7
-> 🔥 Giao nhanh • Uy tín
-> 💬 Hỗ trợ nhanh chóng
-╰━━━━━━━━━━━━━━━━━━╯
+╭─────────────⭓
+> ⚡ **Mua file tự động**
+> 💎 **File chất lượng premium**
+> 🚀 **Nhận role ngay lập tức**
+> 💬 **Hỗ trợ nhanh chóng**
+╰─────────────⭓
 `)
 
     .addFields(
-      {
-        name: "🔥 Filza iOS",
-        value:
-          `💸 **1 OB:** \`50.000₫\`
-💎 **VV:** \`100.000₫\`
 
-📤 **Đã bán:** \`${stock.filza.sold}\`
-📥 **Còn:** \`${stock.filza.remain}\``,
+      {
+        name: "🔥 FILZA IOS",
+        value:
+`> 💠 **1 OB:** \`50.000₫\`
+> 👑 **Vĩnh Viễn:** \`100.000₫\`
+
+> 📦 **Đã bán:** \`${stock.filza.sold}\`
+> 📁 **Kho:** \`${stock.filza.remain}\``,
         inline: true
       },
 
       {
-        name: "💎 iMazing",
+        name: "💎 IMAZING",
         value:
-          `💸 **1 OB:** \`70.000₫\`
-💎 **VV:** \`150.000₫\`
+`> 💠 **1 OB:** \`70.000₫\`
+> 👑 **Vĩnh Viễn:** \`150.000₫\`
 
-📤 **Đã bán:** \`${stock.imazing.sold}\`
-📥 **Còn:** \`${stock.imazing.remain}\``,
+> 📦 **Đã bán:** \`${stock.imazing.sold}\`
+> 📁 **Kho:** \`${stock.imazing.remain}\``,
         inline: true
       },
 
       {
-        name: "📁 File ADR",
+        name: "📁 FILE ADR",
         value:
-          `💸 **1 OB:** \`100.000₫\`
-💎 **VV:** \`250.000₫\`
+`> 💠 **1 OB:** \`100.000₫\`
+> 👑 **Vĩnh Viễn:** \`250.000₫\`
 
-📤 **Đã bán:** \`${stock.adr.sold}\`
-📥 **Còn:** \`${stock.adr.remain}\``,
+> 📦 **Đã bán:** \`${stock.adr.sold}\`
+> 📁 **Kho:** \`${stock.adr.remain}\``,
         inline: true
       },
 
       {
-        name: "📌 Thông tin",
+        name: "━━━━━━━━━━━ 💳 THANH TOÁN",
         value:
-          `🛒 Mua hàng tự động
-💳 Nạp tiền qua QR
-📩 Nhận file qua DM
-⚡ Online 24/7`,
+`> 🏦 **Bank:** \`${BANK}\`
+> 💳 **STK:** \`${STK}\`
+> ⚡ **QR tự động**
+> 📩 **Nhận file qua DM**`,
         inline: false
       }
+
     )
 
     .setThumbnail(THUMBNAIL)
@@ -261,10 +265,11 @@ function createShopEmbed() {
     .setImage(IMAGE)
 
     .setFooter({
-      text: "NQK SHOP • Premium Store"
+      text: "NQK SHOP PREMIUM • Uy tín tạo nên thương hiệu"
     })
 
     .setTimestamp();
+};
 }
 
 // ================= SHOP BUTTON =================
