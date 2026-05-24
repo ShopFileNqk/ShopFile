@@ -207,59 +207,53 @@ function createShopEmbed() {
     .setDescription(`
 ╭─────────────⭓
 > ⚡ **Mua File Tự Động**
-> 💬 **Hỗ trợ nhanh chóng**
+> 🚀 **Nhận Role Ngay**
+> 💬 **Hỗ Trợ Nhanh Chóng**
 ╰─────────────⭓
 `)
 
     .addFields(
 
-{
-name:"👑 FILZA IOS VIP",
-value:
-`╭ 💎 PREMIUM
-├ 1 OB • \`50.000₫\`
-├ VV • \`100.000₫\`
-╰ Kho • \`${stock.filza.remain}\``,
-inline:true
-},
-
-{
-name:"💠 IMAZING VIP",
-value:
-`╭ 💎 PREMIUM
-├ 1 OB • \`70.000₫\`
-├ VV • \`150.000₫\`
-╰ Kho • \`${stock.imazing.remain}\``,
-inline:true
-},
-
-{
-name:"⚡ FILE ADR VIP",
-value:
-`╭ 💎 PREMIUM
-├ 1 OB • \`100.000₫\`
-├ VV • \`250.000₫\`
-╰ Kho • \`${stock.adr.remain}\``,
-inline:true
-}
-),
+      {
+        name: "👑 FILZA IOS",
+        value:
+`╭ 💎 Support [ 12 - 18.7.1 ]
+├ 💠 1 OB • \`50.000₫\`
+├ 👑 VV • \`100.000₫\`
+├ 📦 Đã bán • \`${stock.filza.sold}\`
+╰ 📁 Kho • \`${stock.filza.remain}\``,
+        inline: true
+      },
 
       {
-        name: "📁 FILE ADR",
+        name: "💠 IMAZING IOS",
         value:
-`> 💠 **1 OB:** \`100.000₫\`
-> 👑 **Vĩnh Viễn:** \`250.000₫\`
+`╭ 💎 Support All IOS
+├ 💠 1 OB • \`70.000₫\`
+├ 👑 VV • \`150.000₫\`
+├ 📦 Đã bán • \`${stock.imazing.sold}\`
+╰ 📁 Kho • \`${stock.imazing.remain}\``,
+        inline: true
+      },
 
-> 📦 **Đã bán:** \`${stock.adr.sold}\`
-> 📁 **Kho:** \`${stock.adr.remain}\``,
+      {
+        name: "⚡ FILE ADR ROOT",
+        value:
+`╭ 💎 Support Adr Root
+├ 💠 1 OB • \`100.000₫\`
+├ 👑 VV • \`250.000₫\`
+├ 📦 Đã bán • \`${stock.adr.sold}\`
+╰ 📁 Kho • \`${stock.adr.remain}\``,
         inline: true
       },
 
       {
         name: "━━━━━━━━━━━ 💳 BANK & BUY",
         value:
-> ⚡ **Nạp Tiền Tự Động**
-> 📩 **Nhận File qua DM**`,
+`> ⚡ **Nạp Tiền Tự Động**
+> 📩 **Nhận File Qua DM**
+> 💳 **Thanh Toán Nhanh**
+> 🟢 **Online 24/7**`,
         inline: false
       }
 
