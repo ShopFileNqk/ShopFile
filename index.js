@@ -105,7 +105,7 @@ const products = {
       },
 
       vv: {
-        price: 150000,
+        price: 100000,
         label: "Vĩnh Viễn",
         role: "1502261775922368552",
         channel: "1502262825308131471"
@@ -166,46 +166,80 @@ async function sendShopEmbed() {
   if (!channel) return;
 
   const embed = new EmbedBuilder()
-    .setColor("#00d4ff")
-    .setTitle("🛒 NQK SHOP FILE")
-    .setDescription(`
-╭・💎 **FILE PREMIUM**
-╰・Tự động • Nhanh • Uy tín
 
-━━━━━━━━━━━━━━━━━━
+.setColor("#00d4ff")
 
-### 🔥 Filza iOS
-> 💸 50.000₫ ・1 OB
-> 💸 150.000₫ ・VV
-> 📤 Đã bán: ${stock.filza.sold}
-> 📥 Còn lại: ${stock.filza.remain}
+.setAuthor({
+    name: "NQK SHOP PREMIUM",
+    iconURL: THUMBNAIL
+})
 
-━━━━━━━━━━━━━━━━━━
-
-### 💎 iMazing
-> 💸 70.000₫ ・1 OB
-> 💸 150.000₫ ・VV
-> 📤 Đã bán: ${stock.imazing.sold}
-> 📥 Còn lại: ${stock.imazing.remain}
-
-━━━━━━━━━━━━━━━━━━
-
-### 📁 File ADR
-> 💸 100.000₫ ・1 OB
-> 💸 250.000₫ ・VV
-> 📤 Đã bán: ${stock.adr.sold}
-> 📥 Còn lại: ${stock.adr.remain}
-
-━━━━━━━━━━━━━━━━━━
-
-> ⚡ Mua hàng tự động 24/7
-> 🔥 Hỗ trợ nhanh chóng
+.setTitle("🛒 SHOP FILE AUTO BUY")
+    
+.setDescription(`
+╭━━━ 💎 **SHOP FILE PREMIUM** ━━━╮
+> ⚡ Tự động 24/7
+> 🔥 Giao nhanh • Uy tín
+> 💬 Hỗ trợ nhanh chóng
+╰━━━━━━━━━━━━━━━━━━╯
 `)
-    .setThumbnail(THUMBNAIL)
-    .setImage(IMAGE)
-    .setFooter({
-      text: "NQK SHOP PREMIUM"
-    });
+
+.addFields(
+
+{
+name:"🔥 Filza iOS",
+value:
+`💸 **1 OB:** \`50.000₫\`
+💎 **VV:** \`100.000₫\`
+
+📤 **Đã bán:** \`${stock.filza.sold}\`
+📥 **Còn:** \`${stock.filza.remain}\``,
+inline:true
+},
+
+{
+name:"💎 iMazing",
+value:
+`💸 **1 OB:** \`70.000₫\`
+💎 **VV:** \`150.000₫\`
+
+📤 **Đã bán:** \`${stock.imazing.sold}\`
+📥 **Còn:** \`${stock.imazing.remain}\``,
+inline:true
+},
+
+{
+name:"📁 File ADR",
+value:
+`💸 **1 OB:** \`100.000₫\`
+💎 **VV:** \`250.000₫\`
+
+📤 **Đã bán:** \`${stock.adr.sold}\`
+📥 **Còn:** \`${stock.adr.remain}\``,
+inline:true
+},
+
+{
+name:"📌 Thông tin",
+value:
+`🛒 Mua hàng tự động
+💳 Nạp tiền qua QR
+📩 Nhận file qua DM
+⚡ Online 24/7`,
+inline:false
+}
+
+)
+
+.setThumbnail(THUMBNAIL)
+
+.setImage(IMAGE)
+
+.setFooter({
+text:"NQK SHOP • Premium Store"
+})
+
+.setTimestamp();
 
   const row = new ActionRowBuilder()
     .addComponents(
@@ -260,44 +294,52 @@ async function updateShopEmbed() {
     shopMessage.embeds[0]
   );
 
-  embed.setDescription(`
-╭・💎 **FILE PREMIUM**
-╰・Tự động • Nhanh • Uy tín
+  embed.setFields(
 
-━━━━━━━━━━━━━━━━━━
+{
+name:"🔥 File Filza iOS",
+value:
+`💸 **1 OB:** \`50.000₫\`
+💎 **VV:** \`100.000₫\`
 
-### 🔥 Filza iOS
-> 💸 50.000₫ ・1 OB
-> 💸 150.000₫ ・VV
-> 📤 Đã bán: ${stock.filza.sold}
-> 📥 Còn lại: ${stock.filza.remain}
+📤 **Đã bán:** \`${stock.filza.sold}\`
+📥 **Còn:** \`${stock.filza.remain}\``,
+inline:true
+},
 
-━━━━━━━━━━━━━━━━━━
+{
+name:"💎 File iMazing iOS",
+value:
+`💸 **1 OB:** \`70.000₫\`
+💎 **VV:** \`150.000₫\`
 
-### 💎 iMazing
-> 💸 70.000₫ ・1 OB
-> 💸 150.000₫ ・VV
-> 📤 Đã bán: ${stock.imazing.sold}
-> 📥 Còn lại: ${stock.imazing.remain}
+📤 **Đã bán:** \`${stock.imazing.sold}\`
+📥 **Còn:** \`${stock.imazing.remain}\``,
+inline:true
+},
 
-━━━━━━━━━━━━━━━━━━
+{
+name:"📁 File ADR [ Root ]",
+value:
+`💸 **1 OB:** \`100.000₫\`
+💎 **VV:** \`250.000₫\`
 
-### 📁 File ADR
-> 💸 100.000₫ ・1 OB
-> 💸 250.000₫ ・VV
-> 📤 Đã bán: ${stock.adr.sold}
-> 📥 Còn lại: ${stock.adr.remain}
+📤 **Đã bán:** \`${stock.adr.sold}\`
+📥 **Còn:** \`${stock.adr.remain}\``,
+inline:true
+},
 
-━━━━━━━━━━━━━━━━━━
-
-> ⚡ Mua hàng tự động 24/7
-> 🔥 Hỗ trợ nhanh chóng
-`);
-
-  await shopMessage.edit({
-    embeds: [embed]
-  });
+{
+name:"📌 Thông tin",
+value:
+`🛒 Mua hàng tự động
+💳 Thanh toán QR
+📩 Nhận file qua DM
+⚡ Online 24/7`,
+inline:false
 }
+
+);
 
 // ===== READY =====
 client.once("ready", async () => {
