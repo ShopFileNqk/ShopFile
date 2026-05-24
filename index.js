@@ -206,36 +206,43 @@ function createShopEmbed() {
 
     .setDescription(`
 ╭─────────────⭓
-> ⚡ **Mua file tự động**
-> 💎 **File chất lượng premium**
-> 🚀 **Nhận role ngay lập tức**
+> ⚡ **Mua File Tự Động**
 > 💬 **Hỗ trợ nhanh chóng**
 ╰─────────────⭓
 `)
 
     .addFields(
 
-      {
-        name: "🔥 FILZA IOS",
-        value:
-`> 💠 **1 OB:** \`50.000₫\`
-> 👑 **Vĩnh Viễn:** \`100.000₫\`
+{
+name:"👑 FILZA IOS VIP",
+value:
+`╭ 💎 PREMIUM
+├ 1 OB • \`50.000₫\`
+├ VV • \`100.000₫\`
+╰ Kho • \`${stock.filza.remain}\``,
+inline:true
+},
 
-> 📦 **Đã bán:** \`${stock.filza.sold}\`
-> 📁 **Kho:** \`${stock.filza.remain}\``,
-        inline: true
-      },
+{
+name:"💠 IMAZING VIP",
+value:
+`╭ 💎 PREMIUM
+├ 1 OB • \`70.000₫\`
+├ VV • \`150.000₫\`
+╰ Kho • \`${stock.imazing.remain}\``,
+inline:true
+},
 
-      {
-        name: "💎 IMAZING",
-        value:
-`> 💠 **1 OB:** \`70.000₫\`
-> 👑 **Vĩnh Viễn:** \`150.000₫\`
-
-> 📦 **Đã bán:** \`${stock.imazing.sold}\`
-> 📁 **Kho:** \`${stock.imazing.remain}\``,
-        inline: true
-      },
+{
+name:"⚡ FILE ADR VIP",
+value:
+`╭ 💎 PREMIUM
+├ 1 OB • \`100.000₫\`
+├ VV • \`250.000₫\`
+╰ Kho • \`${stock.adr.remain}\``,
+inline:true
+}
+),
 
       {
         name: "📁 FILE ADR",
@@ -249,12 +256,10 @@ function createShopEmbed() {
       },
 
       {
-        name: "━━━━━━━━━━━ 💳 THANH TOÁN",
+        name: "━━━━━━━━━━━ 💳 BANK & BUY",
         value:
-`> 🏦 **Bank:** \`${BANK}\`
-> 💳 **STK:** \`${STK}\`
-> ⚡ **QR tự động**
-> 📩 **Nhận file qua DM**`,
+> ⚡ **Nạp Tiền Tự Động**
+> 📩 **Nhận File qua DM**`,
         inline: false
       }
 
