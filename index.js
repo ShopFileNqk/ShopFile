@@ -11,13 +11,14 @@ const {
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
-  Events
+  Events,
+  ChannelType
 } = require("discord.js");
 
 const fs = require("fs");
 const express = require("express");
 
-// ===== KEEP RAILWAY ONLINE =====
+// ================= EXPRESS KEEP ALIVE =================
 const app = express();
 
 app.get("/", (req, res) => {
@@ -26,11 +27,11 @@ app.get("/", (req, res) => {
 
 const PORT = process.env.PORT || 8080;
 
-app.listen(PORT, () => {
-  console.log(`Web Running ${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`🌐 Web Running ${PORT}`);
 });
 
-// ===== DISCORD CLIENT =====
+// ================= DISCORD CLIENT =================
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -38,7 +39,7 @@ const client = new Client({
   ]
 });
 
-// ===== CONFIG =====
+// ================= CONFIG =================
 const SHOP_CHANNEL = "1502260846754267248";
 const LOG_CHANNEL = "1502260922733953155";
 
@@ -51,47 +52,80 @@ const IMAGE =
 const BANK = "Vietinbank";
 const STK = "105884390640";
 
-// ===== FILE =====
+// ================= FILE =================
 const balancesFile = "./balances.json";
+const stockFile = "./stock.json";
 
+// ===== CREATE FILES =====
 if (!fs.existsSync(balancesFile)) {
   fs.writeFileSync(balancesFile, "{}");
 }
 
-function getBalances() {
-  try {
-    return JSON.parse(fs.readFileSync(balancesFile));
-  } catch {
-    return {};
-  }
-}
-
-function saveBalances(data) {
+if (!fs.existsSync(stockFile)) {
   fs.writeFileSync(
-    balancesFile,
-    JSON.stringify(data, null, 2)
+    stockFile,
+    JSON.stringify(
+      {
+        filza: {
+          remain: 100,
+          sold: 0
+        },
+        imazing: {
+          remain: 100,
+          sold: 0
+        },
+        adr: {
+          remain: 100,
+          sold: 0
+        }
+      },
+      null,
+      2
+    )
   );
 }
 
-// ===== STOCK =====
-const stock = {
-  filza: {
-    remain: 100,
-    sold: 0
-  },
-
-  imazing: {
-    remain: 100,
-    sold: 0
-  },
-
-  adr: {
-    remain: 100,
-    sold: 0
+// ================= FUNCTIONS =================
+function safeReadJSON(path, fallback = {}) {
+  try {
+    return JSON.parse(fs.readFileSync(path));
+  } catch (err) {
+    console.log(`READ JSON ERROR ${path}`, err);
+    return fallback;
   }
-};
+}
 
-// ===== PRODUCTS =====
+function safeWriteJSON(path, data) {
+  try {
+    fs.writeFileSync(
+      path,
+      JSON.stringify(data, null, 2)
+    );
+  } catch (err) {
+    console.log(`WRITE JSON ERROR ${path}`, err);
+  }
+}
+
+function getBalances() {
+  return safeReadJSON(balancesFile, {});
+}
+
+function saveBalances(data) {
+  safeWriteJSON(balancesFile, data);
+}
+
+function getStock() {
+  return safeReadJSON(stockFile, {});
+}
+
+function saveStock(data) {
+  safeWriteJSON(stockFile, data);
+}
+
+// ================= STOCK =================
+let stock = getStock();
+
+// ================= PRODUCTS =================
 const products = {
   filza: {
     name: "Filza iOS",
@@ -154,29 +188,22 @@ const products = {
   }
 };
 
-let shopMessage;
+let shopMessage = null;
 
-// ===== SHOP EMBED =====
-async function sendShopEmbed() {
+// ================= CREATE SHOP EMBED =================
+function createShopEmbed() {
+  return new EmbedBuilder()
 
-  const channel = await client.channels.fetch(
-    SHOP_CHANNEL
-  );
+    .setColor("#00d4ff")
 
-  if (!channel) return;
+    .setAuthor({
+      name: "NQK SHOP PREMIUM",
+      iconURL: THUMBNAIL
+    })
 
-  const embed = new EmbedBuilder()
+    .setTitle("🛒 SHOP FILE AUTO BUY")
 
-.setColor("#00d4ff")
-
-.setAuthor({
-    name: "NQK SHOP PREMIUM",
-    iconURL: THUMBNAIL
-})
-
-.setTitle("🛒 SHOP FILE AUTO BUY")
-    
-.setDescription(`
+    .setDescription(`
 ╭━━━ 💎 **SHOP FILE PREMIUM** ━━━╮
 > ⚡ Tự động 24/7
 > 🔥 Giao nhanh • Uy tín
@@ -184,183 +211,161 @@ async function sendShopEmbed() {
 ╰━━━━━━━━━━━━━━━━━━╯
 `)
 
-.addFields(
-
-{
-name:"🔥 Filza iOS",
-value:
-`💸 **1 OB:** \`50.000₫\`
+    .addFields(
+      {
+        name: "🔥 Filza iOS",
+        value:
+          `💸 **1 OB:** \`50.000₫\`
 💎 **VV:** \`100.000₫\`
 
 📤 **Đã bán:** \`${stock.filza.sold}\`
 📥 **Còn:** \`${stock.filza.remain}\``,
-inline:true
-},
+        inline: true
+      },
 
-{
-name:"💎 iMazing",
-value:
-`💸 **1 OB:** \`70.000₫\`
+      {
+        name: "💎 iMazing",
+        value:
+          `💸 **1 OB:** \`70.000₫\`
 💎 **VV:** \`150.000₫\`
 
 📤 **Đã bán:** \`${stock.imazing.sold}\`
 📥 **Còn:** \`${stock.imazing.remain}\``,
-inline:true
-},
+        inline: true
+      },
 
-{
-name:"📁 File ADR",
-value:
-`💸 **1 OB:** \`100.000₫\`
+      {
+        name: "📁 File ADR",
+        value:
+          `💸 **1 OB:** \`100.000₫\`
 💎 **VV:** \`250.000₫\`
 
 📤 **Đã bán:** \`${stock.adr.sold}\`
 📥 **Còn:** \`${stock.adr.remain}\``,
-inline:true
-},
+        inline: true
+      },
 
-{
-name:"📌 Thông tin",
-value:
-`🛒 Mua hàng tự động
+      {
+        name: "📌 Thông tin",
+        value:
+          `🛒 Mua hàng tự động
 💳 Nạp tiền qua QR
 📩 Nhận file qua DM
 ⚡ Online 24/7`,
-inline:false
+        inline: false
+      }
+    )
+
+    .setThumbnail(THUMBNAIL)
+
+    .setImage(IMAGE)
+
+    .setFooter({
+      text: "NQK SHOP • Premium Store"
+    })
+
+    .setTimestamp();
 }
 
-)
+// ================= SHOP BUTTON =================
+function createMainButtons() {
+  return new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId("buy")
+      .setLabel("🛒 Mua")
+      .setStyle(ButtonStyle.Success),
 
-.setThumbnail(THUMBNAIL)
+    new ButtonBuilder()
+      .setCustomId("nap")
+      .setLabel("💳 Nạp")
+      .setStyle(ButtonStyle.Primary),
 
-.setImage(IMAGE)
+    new ButtonBuilder()
+      .setCustomId("balance")
+      .setLabel("🧧 Số Dư")
+      .setStyle(ButtonStyle.Secondary)
+  );
+}
 
-.setFooter({
-text:"NQK SHOP • Premium Store"
-})
-
-.setTimestamp();
-
-  const row = new ActionRowBuilder()
-    .addComponents(
-      new ButtonBuilder()
-        .setCustomId("buy")
-        .setLabel("🛒 Mua")
-        .setStyle(ButtonStyle.Success),
-
-      new ButtonBuilder()
-        .setCustomId("nap")
-        .setLabel("💳 Nạp")
-        .setStyle(ButtonStyle.Primary),
-
-      new ButtonBuilder()
-        .setCustomId("balance")
-        .setLabel("🧧 Số Dư")
-        .setStyle(ButtonStyle.Secondary)
+// ================= SEND SHOP EMBED =================
+async function sendShopEmbed() {
+  try {
+    const channel = await client.channels.fetch(
+      SHOP_CHANNEL
     );
 
-  const messages = await channel.messages.fetch({
-    limit: 20
-  });
+    if (!channel) {
+      console.log("❌ Không tìm thấy SHOP_CHANNEL");
+      return;
+    }
 
-  const old = messages.find(
-    m =>
-      m.author.id === client.user.id &&
-      m.embeds.length
-  );
+    const messages =
+      await channel.messages.fetch({
+        limit: 20
+      });
 
-  if (old) {
+    const oldMessage = messages.find(
+      m =>
+        m.author.id === client.user.id &&
+        m.embeds.length > 0
+    );
 
-    shopMessage = await old.edit({
-      embeds: [embed],
-      components: [row]
-    });
+    if (oldMessage) {
+      shopMessage = await oldMessage.edit({
+        embeds: [createShopEmbed()],
+        components: [createMainButtons()]
+      });
 
-  } else {
+      console.log("✅ Đã update shop embed");
+    } else {
+      shopMessage = await channel.send({
+        embeds: [createShopEmbed()],
+        components: [createMainButtons()]
+      });
 
-    shopMessage = await channel.send({
-      embeds: [embed],
-      components: [row]
-    });
+      console.log("✅ Đã gửi shop embed");
+    }
+  } catch (err) {
+    console.log("SEND SHOP ERROR:", err);
   }
 }
 
-// ===== UPDATE EMBED =====
+// ================= UPDATE SHOP EMBED =================
 async function updateShopEmbed() {
+  try {
+    stock = getStock();
 
-  if (!shopMessage) return;
+    if (!shopMessage) return;
 
-  const embed = EmbedBuilder.from(
-    shopMessage.embeds[0]
-  );
+    await shopMessage.edit({
+      embeds: [createShopEmbed()],
+      components: [createMainButtons()]
+    });
 
-  embed.setFields(
-
-{
-name:"🔥 File Filza iOS",
-value:
-`💸 **1 OB:** \`50.000₫\`
-💎 **VV:** \`100.000₫\`
-
-📤 **Đã bán:** \`${stock.filza.sold}\`
-📥 **Còn:** \`${stock.filza.remain}\``,
-inline:true
-},
-
-{
-name:"💎 File iMazing iOS",
-value:
-`💸 **1 OB:** \`70.000₫\`
-💎 **VV:** \`150.000₫\`
-
-📤 **Đã bán:** \`${stock.imazing.sold}\`
-📥 **Còn:** \`${stock.imazing.remain}\``,
-inline:true
-},
-
-{
-name:"📁 File ADR [ Root ]",
-value:
-`💸 **1 OB:** \`100.000₫\`
-💎 **VV:** \`250.000₫\`
-
-📤 **Đã bán:** \`${stock.adr.sold}\`
-📥 **Còn:** \`${stock.adr.remain}\``,
-inline:true
-},
-
-{
-name:"📌 Thông tin",
-value:
-`🛒 Mua hàng tự động
-💳 Thanh toán QR
-📩 Nhận file qua DM
-⚡ Online 24/7`,
-inline:false
+  } catch (err) {
+    console.log("UPDATE SHOP ERROR:", err);
+  }
 }
 
-);
-
-// ===== READY =====
+// ================= READY =================
 client.once("ready", async () => {
-
-  console.log(`${client.user.tag} Online`);
+  console.log(`✅ ${client.user.tag} Online`);
 
   try {
     await sendShopEmbed();
   } catch (err) {
-    console.log(err);
+    console.log("READY ERROR:", err);
   }
 });
 
-// ===== INTERACTION =====
+// ================= INTERACTION =================
 client.on(
   Events.InteractionCreate,
   async interaction => {
 
     try {
 
-      // ===== BUY BUTTON =====
+      // ================= BUY BUTTON =================
       if (
         interaction.isButton() &&
         interaction.customId === "buy"
@@ -392,58 +397,52 @@ client.on(
 
         return interaction.reply({
           components: [
-            new ActionRowBuilder().addComponents(
-              menu
-            )
+            new ActionRowBuilder().addComponents(menu)
           ],
           ephemeral: true
         });
       }
 
-      // ===== SELECT PRODUCT =====
+      // ================= SELECT PRODUCT =================
       if (
         interaction.isStringSelectMenu() &&
         interaction.customId === "select_product"
       ) {
 
-        const productKey =
-          interaction.values[0];
+        const productKey = interaction.values[0];
+        const product = products[productKey];
 
-        const product =
-          products[productKey];
+        if (!product) {
+          return interaction.update({
+            content: "❌ Không tìm thấy sản phẩm",
+            components: []
+          });
+        }
 
         const menu =
           new StringSelectMenuBuilder()
-            .setCustomId(
-              `price_${productKey}`
-            )
-            .setPlaceholder(
-              "📌 Chọn gói"
-            )
+            .setCustomId(`price_${productKey}`)
+            .setPlaceholder("📌 Chọn gói")
             .addOptions(
-              Object.entries(
-                product.prices
-              ).map(([key, data]) => ({
-                label: `${data.price.toLocaleString()}₫ | ${data.label}`,
-                value: key
-              }))
+              Object.entries(product.prices).map(
+                ([key, data]) => ({
+                  label: `${data.price.toLocaleString()}₫ | ${data.label}`,
+                  value: key
+                })
+              )
             );
 
         return interaction.update({
           components: [
-            new ActionRowBuilder().addComponents(
-              menu
-            )
+            new ActionRowBuilder().addComponents(menu)
           ]
         });
       }
 
-      // ===== BUY PRODUCT =====
+      // ================= BUY PRODUCT =================
       if (
         interaction.isStringSelectMenu() &&
-        interaction.customId.startsWith(
-          "price_"
-        )
+        interaction.customId.startsWith("price_")
       ) {
 
         await interaction.deferReply({
@@ -479,11 +478,25 @@ client.on(
           });
         }
 
-        const price =
-          option.price;
+        // ===== CHECK STOCK =====
+        if (
+          stock[productKey].remain <= 0
+        ) {
+          return interaction.editReply({
+            embeds: [
+              new EmbedBuilder()
+                .setColor("Red")
+                .setTitle("❌ Hết hàng")
+                .setDescription(
+                  "Sản phẩm hiện đã hết hàng."
+                )
+            ]
+          });
+        }
 
-        const balances =
-          getBalances();
+        const price = option.price;
+
+        const balances = getBalances();
 
         if (
           !balances[interaction.user.id]
@@ -506,45 +519,52 @@ client.on(
                 )
                 .setDescription(`
 💵 Số dư hiện tại:
-${balances[
-  interaction.user.id
-].toLocaleString()}₫
+## ${balances[
+                  interaction.user.id
+                ].toLocaleString()}₫
 `)
             ]
           });
         }
 
         // ===== SUB MONEY =====
-        balances[interaction.user.id] -=
-          price;
+        balances[interaction.user.id] -= price;
 
         saveBalances(balances);
 
-        // ===== STOCK =====
+        // ===== UPDATE STOCK =====
         stock[productKey].sold++;
         stock[productKey].remain--;
+
+        saveStock(stock);
 
         await updateShopEmbed();
 
         // ===== MEMBER =====
-        const member =
-          await interaction.guild.members.fetch(
-            interaction.user.id
-          );
+        let member = null;
+
+        try {
+          member =
+            await interaction.guild.members.fetch(
+              interaction.user.id
+            );
+        } catch {}
 
         // ===== ADD ROLE =====
-        try {
-          await member.roles.add(
-            option.role
-          );
-        } catch (err) {
-          console.log(
-            "ADD ROLE ERROR:",
-            err
-          );
+        if (member) {
+          try {
+            await member.roles.add(
+              option.role
+            );
+          } catch (err) {
+            console.log(
+              "ADD ROLE ERROR:",
+              err
+            );
+          }
         }
 
-        // ===== CHANNEL =====
+        // ===== PRODUCT CHANNEL =====
         const productChannel =
           interaction.guild.channels.cache.get(
             option.channel
@@ -603,17 +623,15 @@ ${balances[
                 "Cảm ơn bạn đã mua hàng ❤️"
             });
 
-        // ===== DM =====
+        // ===== DM USER =====
         try {
-
           await interaction.user.send({
             embeds: [successEmbed]
           });
-
-        } catch {
-
+        } catch (err) {
           console.log(
-            "Không thể gửi DM"
+            "DM ERROR:",
+            err.message
           );
         }
 
@@ -625,17 +643,20 @@ ${balances[
               LOG_CHANNEL
             );
 
-          if (logChannel) {
+          if (
+            logChannel &&
+            logChannel.type ===
+              ChannelType.GuildText
+          ) {
             await logChannel.send({
               embeds: [successEmbed]
             });
           }
 
         } catch (err) {
-          console.log(err);
+          console.log("LOG ERROR:", err);
         }
 
-        // ===== SUCCESS =====
         return interaction.editReply({
           embeds: [
             new EmbedBuilder()
@@ -650,7 +671,7 @@ ${balances[
         });
       }
 
-      // ===== BALANCE =====
+      // ================= BALANCE =================
       if (
         interaction.isButton() &&
         interaction.customId ===
@@ -681,7 +702,7 @@ ${balances[
         });
       }
 
-      // ===== NAP =====
+      // ================= NAP =================
       if (
         interaction.isButton() &&
         interaction.customId === "nap"
@@ -689,17 +710,13 @@ ${balances[
 
         const modal =
           new ModalBuilder()
-            .setCustomId(
-              "nap_modal"
-            )
+            .setCustomId("nap_modal")
             .setTitle("Nạp Tiền");
 
         const amount =
           new TextInputBuilder()
             .setCustomId("money")
-            .setLabel(
-              "Nhập số tiền"
-            )
+            .setLabel("Nhập số tiền")
             .setPlaceholder(
               "Ví dụ: 50000"
             )
@@ -719,7 +736,7 @@ ${balances[
         );
       }
 
-      // ===== MODAL =====
+      // ================= MODAL =================
       if (
         interaction.isModalSubmit() &&
         interaction.customId ===
@@ -836,7 +853,7 @@ ${balances[
         }
       }
 
-      // ===== ACCEPT =====
+      // ================= ACCEPT =================
       if (
         interaction.isButton() &&
         interaction.customId.startsWith(
@@ -857,14 +874,10 @@ ${balances[
         }
 
         const data =
-          interaction.customId.split(
-            "_"
-          );
+          interaction.customId.split("_");
 
         const userId = data[1];
-
-        const amount =
-          Number(data[2]);
+        const amount = Number(data[2]);
 
         const balances =
           getBalances();
@@ -913,16 +926,33 @@ ${balances[
             ]
           });
 
-        } catch {}
+        } catch (err) {
+          console.log(
+            "SEND USER ERROR:",
+            err
+          );
+        }
       }
 
-      // ===== DENY =====
+      // ================= DENY =================
       if (
         interaction.isButton() &&
         interaction.customId.startsWith(
           "deny_"
         )
       ) {
+
+        if (
+          !interaction.member.roles.cache.has(
+            process.env.ADMIN_ROLE
+          )
+        ) {
+          return interaction.reply({
+            content:
+              "❌ Không có quyền",
+            ephemeral: true
+          });
+        }
 
         const embed =
           EmbedBuilder.from(
@@ -943,7 +973,7 @@ ${balances[
     } catch (err) {
 
       console.log(
-        "INTERACTION ERROR:",
+        "❌ INTERACTION ERROR:",
         err
       );
 
@@ -968,17 +998,22 @@ ${balances[
           });
         }
 
-      } catch {}
+      } catch (e) {
+        console.log(
+          "REPLY ERROR:",
+          e
+        );
+      }
     }
   }
 );
 
-// ===== ERROR =====
+// ================= ERROR HANDLER =================
 process.on(
   "unhandledRejection",
   err => {
     console.log(
-      "UNHANDLED:",
+      "UNHANDLED REJECTION:",
       err
     );
   }
@@ -988,11 +1023,13 @@ process.on(
   "uncaughtException",
   err => {
     console.log(
-      "UNCAUGHT:",
+      "UNCAUGHT EXCEPTION:",
       err
     );
   }
 );
 
-// ===== LOGIN =====
-client.login(process.env.TOKEN);
+// ================= LOGIN =================
+client.login(process.env.TOKEN).catch(err => {
+  console.log("LOGIN ERROR:", err);
+});
