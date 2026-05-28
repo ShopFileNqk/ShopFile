@@ -56,7 +56,7 @@ const STK = "105884390640";
 const balancesFile = "./balances.json";
 const stockFile = "./stock.json";
 
-// ===== CREATE FILES =====
+// ================= CREATE FILE =================
 if (!fs.existsSync(balancesFile)) {
   fs.writeFileSync(balancesFile, "{}");
 }
@@ -70,10 +70,12 @@ if (!fs.existsSync(stockFile)) {
           remain: 100,
           sold: 0
         },
+
         imazing: {
           remain: 100,
           sold: 0
         },
+
         adr: {
           remain: 100,
           sold: 0
@@ -85,7 +87,7 @@ if (!fs.existsSync(stockFile)) {
   );
 }
 
-// ================= FUNCTIONS =================
+// ================= JSON =================
 function safeReadJSON(path, fallback = {}) {
   try {
     return JSON.parse(fs.readFileSync(path));
@@ -127,10 +129,12 @@ let stock = getStock();
 
 // ================= PRODUCTS =================
 const products = {
+
   filza: {
     name: "Filza iOS",
 
     prices: {
+
       ob: {
         price: 50000,
         label: "1 OB",
@@ -139,7 +143,7 @@ const products = {
       },
 
       vv: {
-        price: 100000,
+        price: 150000,
         label: "Vĩnh Viễn",
         role: "1502261775922368552",
         channel: "1502262825308131471"
@@ -151,6 +155,7 @@ const products = {
     name: "iMazing",
 
     prices: {
+
       ob: {
         price: 70000,
         label: "1 OB",
@@ -171,6 +176,7 @@ const products = {
     name: "File ADR",
 
     prices: {
+
       ob: {
         price: 100000,
         label: "1 OB",
@@ -190,8 +196,10 @@ const products = {
 
 let shopMessage = null;
 
-// ================= CREATE SHOP EMBED =================
+// ================= SHOP EMBED =================
 function createShopEmbed() {
+
+  stock = getStock();
 
   return new EmbedBuilder()
 
@@ -202,61 +210,55 @@ function createShopEmbed() {
       iconURL: THUMBNAIL
     })
 
-    .setTitle("🛒 SHOP FILE IOS • AUTO 24/7")
+    .setTitle("🛒 STORE FILE • AUTO 24/7")
 
     .setDescription(`
 ╭─────────────⭓
-> ⚡ **Mua File Tự Động**
-> 🚀 **Nhận Role Ngay**
-> 💬 **Hỗ Trợ Nhanh Chóng**
+> ⚡ Mua file tự động
+> 💎 AntiBan cực cao
+> 🚀 Hỗ trợ nhanh • Online 24/7
 ╰─────────────⭓
 `)
 
     .addFields(
 
       {
-        name: "👑 FILZA IOS",
+        name: "🔥 FILZA IOS",
         value:
-`╭ 💎 Support [ 12 - 18.7.1 ]
-├ 💠 1 OB • \`50.000₫\`
-├ 👑 VV • \`100.000₫\`
-├ 📦 Đã bán • \`${stock.filza.sold}\`
-╰ 📁 Kho • \`${stock.filza.remain}\``,
+`> 💠 1 OB • \`50.000₫\`
+> 👑 VV • \`150.000₫\`
+> 📦 Sold: \`${stock.filza.sold}\`
+> 📁 Stock: \`${stock.filza.remain}\``,
         inline: true
       },
 
       {
-        name: "💠 IMAZING IOS",
+        name: "💎 IMAZING IOS",
         value:
-`╭ 💎 Support All IOS
-├ 💠 1 OB • \`70.000₫\`
-├ 👑 VV • \`150.000₫\`
-├ 📦 Đã bán • \`${stock.imazing.sold}\`
-╰ 📁 Kho • \`${stock.imazing.remain}\``,
+`> 💠 1 OB • \`70.000₫\`
+> 👑 VV • \`150.000₫\`
+> 📦 Sold: \`${stock.imazing.sold}\`
+> 📁 Stock: \`${stock.imazing.remain}\``,
         inline: true
       },
 
       {
         name: "⚡ FILE ADR ROOT",
         value:
-`╭ 💎 Support Adr Root
-├ 💠 1 OB • \`100.000₫\`
-├ 👑 VV • \`250.000₫\`
-├ 📦 Đã bán • \`${stock.adr.sold}\`
-╰ 📁 Kho • \`${stock.adr.remain}\``,
+`> 💠 1 OB • \`100.000₫\`
+> 👑 VV • \`250.000₫\`
+> 📦 Sold: \`${stock.adr.sold}\`
+> 📁 Stock: \`${stock.adr.remain}\``,
         inline: true
       },
 
       {
-        name: "━━━━━━━━━━━ 💳 BANK & BUY",
+        name: "━━━━━━━━━━━ 💳 PAYMENT",
         value:
-`> ⚡ **Nạp Tiền Tự Động**
-> 📩 **Nhận File Qua DM**
-> 💳 **Thanh Toán Nhanh**
-> 🟢 **Online 24/7**`,
+`> 📩 Nhận file qua DM
+> 🟢 Hệ thống hoạt động ổn định`,
         inline: false
       }
-
     )
 
     .setThumbnail(THUMBNAIL)
@@ -264,78 +266,88 @@ function createShopEmbed() {
     .setImage(IMAGE)
 
     .setFooter({
-      text: "NQK SHOP PREMIUM • Uy tín tạo nên thương hiệu"
+      text: "NQK SHOP PREMIUM • FILE IOS/ADR"
     })
 
     .setTimestamp();
-};
+}
 
-// ================= SHOP BUTTON =================
+// ================= BUTTON =================
 function createMainButtons() {
+
   return new ActionRowBuilder().addComponents(
+
     new ButtonBuilder()
       .setCustomId("buy")
-      .setLabel("🛒 Mua")
+      .setLabel("Mua")
+      .setEmoji("🛒")
       .setStyle(ButtonStyle.Success),
 
     new ButtonBuilder()
       .setCustomId("nap")
-      .setLabel("💳 Nạp")
+      .setLabel("Nạp")
+      .setEmoji("💳")
       .setStyle(ButtonStyle.Primary),
 
     new ButtonBuilder()
       .setCustomId("balance")
-      .setLabel("🧧 Số Dư")
+      .setLabel("Tiền")
+      .setEmoji("💰")
       .setStyle(ButtonStyle.Secondary)
   );
 }
 
-// ================= SEND SHOP EMBED =================
+// ================= SEND SHOP =================
 async function sendShopEmbed() {
-  try {
-    const channel = await client.channels.fetch(
-      SHOP_CHANNEL
-    );
 
-    if (!channel) {
-      console.log("❌ Không tìm thấy SHOP_CHANNEL");
-      return;
-    }
+  try {
+
+    const channel =
+      await client.channels.fetch(
+        SHOP_CHANNEL
+      );
+
+    if (!channel) return;
 
     const messages =
       await channel.messages.fetch({
         limit: 20
       });
 
-    const oldMessage = messages.find(
-      m =>
-        m.author.id === client.user.id &&
-        m.embeds.length > 0
-    );
+    const oldMessage =
+      messages.find(
+        m =>
+          m.author.id === client.user.id &&
+          m.embeds.length > 0
+      );
 
     if (oldMessage) {
-      shopMessage = await oldMessage.edit({
-        embeds: [createShopEmbed()],
-        components: [createMainButtons()]
-      });
 
-      console.log("✅ Đã update shop embed");
+      shopMessage =
+        await oldMessage.edit({
+          embeds: [createShopEmbed()],
+          components: [createMainButtons()]
+        });
+
     } else {
-      shopMessage = await channel.send({
-        embeds: [createShopEmbed()],
-        components: [createMainButtons()]
-      });
 
-      console.log("✅ Đã gửi shop embed");
+      shopMessage =
+        await channel.send({
+          embeds: [createShopEmbed()],
+          components: [createMainButtons()]
+        });
     }
+
   } catch (err) {
-    console.log("SEND SHOP ERROR:", err);
+    console.log(err);
   }
 }
 
-// ================= UPDATE SHOP EMBED =================
+// ================= UPDATE SHOP =================
 async function updateShopEmbed() {
+
   try {
+
     stock = getStock();
 
     if (!shopMessage) return;
@@ -346,19 +358,16 @@ async function updateShopEmbed() {
     });
 
   } catch (err) {
-    console.log("UPDATE SHOP ERROR:", err);
+    console.log(err);
   }
 }
 
 // ================= READY =================
 client.once("ready", async () => {
-  console.log(`✅ ${client.user.tag} Online`);
 
-  try {
-    await sendShopEmbed();
-  } catch (err) {
-    console.log("READY ERROR:", err);
-  }
+  console.log(`✅ ${client.user.tag}`);
+
+  await sendShopEmbed();
 });
 
 // ================= INTERACTION =================
@@ -368,7 +377,7 @@ client.on(
 
     try {
 
-      // ================= BUY BUTTON =================
+      // ================= BUY =================
       if (
         interaction.isButton() &&
         interaction.customId === "buy"
@@ -394,7 +403,7 @@ client.on(
               {
                 label: "File ADR",
                 value: "adr",
-                emoji: "📁"
+                emoji: "⚡"
               }
             ]);
 
@@ -412,24 +421,20 @@ client.on(
         interaction.customId === "select_product"
       ) {
 
-        const productKey = interaction.values[0];
-        const product = products[productKey];
+        const productKey =
+          interaction.values[0];
 
-        if (!product) {
-          return interaction.update({
-            content: "❌ Không tìm thấy sản phẩm",
-            components: []
-          });
-        }
+        const product =
+          products[productKey];
 
         const menu =
           new StringSelectMenuBuilder()
             .setCustomId(`price_${productKey}`)
-            .setPlaceholder("📌 Chọn gói")
+            .setPlaceholder("💎 Chọn gói")
             .addOptions(
               Object.entries(product.prices).map(
                 ([key, data]) => ({
-                  label: `${data.price.toLocaleString()}₫ | ${data.label}`,
+                  label: `${data.price.toLocaleString()}₫ • ${data.label}`,
                   value: key
                 })
               )
@@ -464,27 +469,13 @@ client.on(
         const product =
           products[productKey];
 
-        if (!product) {
-          return interaction.editReply({
-            content:
-              "❌ Không tìm thấy sản phẩm"
-          });
-        }
-
         const option =
           product.prices[packageKey];
 
-        if (!option) {
-          return interaction.editReply({
-            content:
-              "❌ Không tìm thấy gói"
-          });
-        }
-
-        // ===== CHECK STOCK =====
         if (
           stock[productKey].remain <= 0
         ) {
+
           return interaction.editReply({
             embeds: [
               new EmbedBuilder()
@@ -499,7 +490,8 @@ client.on(
 
         const price = option.price;
 
-        const balances = getBalances();
+        const balances =
+          getBalances();
 
         if (
           !balances[interaction.user.id]
@@ -507,7 +499,6 @@ client.on(
           balances[interaction.user.id] = 0;
         }
 
-        // ===== CHECK MONEY =====
         if (
           balances[interaction.user.id] <
           price
@@ -521,7 +512,7 @@ client.on(
                   "❌ Số dư không đủ"
                 )
                 .setDescription(`
-💵 Số dư hiện tại:
+💰 Số dư hiện tại của bạn:
 ## ${balances[
                   interaction.user.id
                 ].toLocaleString()}₫
@@ -547,27 +538,27 @@ client.on(
         let member = null;
 
         try {
+
           member =
             await interaction.guild.members.fetch(
               interaction.user.id
             );
+
         } catch {}
 
         // ===== ADD ROLE =====
         if (member) {
+
           try {
             await member.roles.add(
               option.role
             );
           } catch (err) {
-            console.log(
-              "ADD ROLE ERROR:",
-              err
-            );
+            console.log(err);
           }
         }
 
-        // ===== PRODUCT CHANNEL =====
+        // ===== CHANNEL =====
         const productChannel =
           interaction.guild.channels.cache.get(
             option.channel
@@ -576,66 +567,93 @@ client.on(
         const orderCode =
           `${interaction.user.id}-${Date.now()}`;
 
-        // ===== SUCCESS EMBED =====
-        const successEmbed =
-          new EmbedBuilder()
-            .setColor("#00ff88")
-            .setTitle(
-              "🌐 Mua File Thành Công"
-            )
-            .setThumbnail(
-              interaction.user.displayAvatarURL()
-            )
-            .addFields(
-              {
-                name: "👤 Người Mua",
-                value: `${interaction.user.tag}`
-              },
+        // ================= SUCCESS EMBED =================
+        const successEmbed = new EmbedBuilder()
 
-              {
-                name: "🧾 Mã Đơn",
-                value: `\`${orderCode}\``
-              },
+          .setColor("#5865F2")
 
-              {
-                name: "📦 Sản phẩm",
-                value: product.name
-              },
+          .setAuthor({
+            name: "NQK SHOP PREMIUM",
+            iconURL: THUMBNAIL
+          })
 
-              {
-                name: "💎 Gói",
-                value: option.label
-              },
+          .setTitle("✅ THANH TOÁN THÀNH CÔNG")
 
-              {
-                name: "💰 Giá",
-                value: `${price.toLocaleString()}₫`
-              },
+          .setDescription(`
+╭─────────────⭓
+> 💎 Đơn hàng đã xử lý thành công
+> 📩 File & quyền truy cập đã được cấp
+> 🚀 Cảm ơn bạn đã ủng hộ shop
+╰─────────────⭓
+`)
 
-              {
-                name: "📂 Kênh",
-                value:
-                  productChannel
-                    ? `${productChannel}`
-                    : "Không tìm thấy"
-              }
-            )
-            .setImage(IMAGE)
-            .setFooter({
-              text:
-                "Cảm ơn bạn đã mua hàng ❤️"
-            });
+          .addFields(
 
-        // ===== DM USER =====
+            {
+              name: "👤 Khách Hàng",
+              value: `\`${interaction.user.tag}\``,
+              inline: true
+            },
+
+            {
+              name: "🧾 Mã Đơn",
+              value: `\`${orderCode}\``,
+              inline: true
+            },
+
+            {
+              name: "💰 Thanh Toán",
+              value: `\`${price.toLocaleString()}₫\``,
+              inline: true
+            },
+
+            {
+              name: "📦 Sản Phẩm",
+              value: `
+> ${product.name}
+> ${option.label}
+`,
+              inline: true
+            },
+
+            {
+              name: "📁 Kênh Nhận",
+              value:
+                productChannel
+                  ? `${productChannel}`
+                  : "`Không tìm thấy`",
+              inline: true
+            },
+
+            {
+              name: "⚡ Trạng Thái",
+              value: "`Hoàn tất`",
+              inline: true
+            }
+          )
+
+          .setThumbnail(
+            interaction.user.displayAvatarURL()
+          )
+
+          .setImage(IMAGE)
+
+          .setFooter({
+            text:
+              "NQK SHOP PREMIUM • AUTO DELIVERY"
+          })
+
+          .setTimestamp();
+
+        // ===== DM =====
         try {
+
           await interaction.user.send({
             embeds: [successEmbed]
           });
+
         } catch (err) {
-          console.log(
-            "DM ERROR:",
-            err.message
-          );
+          console.log(err);
         }
 
         // ===== LOG =====
@@ -651,24 +669,26 @@ client.on(
             logChannel.type ===
               ChannelType.GuildText
           ) {
+
             await logChannel.send({
               embeds: [successEmbed]
             });
           }
 
         } catch (err) {
-          console.log("LOG ERROR:", err);
+          console.log(err);
         }
 
         return interaction.editReply({
           embeds: [
             new EmbedBuilder()
-              .setColor("#00ff88")
+              .setColor("#5865F2")
               .setDescription(`
-✅ Đã mua thành công **${product.name}**
-💎 Gói: **${option.label}**
-
-📩 Kiểm tra DM để nhận sản phẩm.
+╭─────────────⭓
+> ✅ Mua hàng thành công
+> 📦 ${product.name} • ${option.label}
+> 📩 Kiểm tra tin nhắn riêng
+╰─────────────⭓
 `)
           ]
         });
@@ -677,8 +697,7 @@ client.on(
       // ================= BALANCE =================
       if (
         interaction.isButton() &&
-        interaction.customId ===
-          "balance"
+        interaction.customId === "balance"
       ) {
 
         const balances =
@@ -690,14 +709,11 @@ client.on(
         return interaction.reply({
           embeds: [
             new EmbedBuilder()
-              .setColor("#00d4ff")
-              .setTitle(
-                "💰 SỐ DƯ TÀI KHOẢN"
-              )
+              .setColor("#5865F2")
+              .setTitle("💰 SỐ DƯ")
               .setDescription(`
 👤 ${interaction.user}
 
-💵 Số dư:
 ## ${money.toLocaleString()}₫
 `)
           ],
@@ -720,9 +736,7 @@ client.on(
           new TextInputBuilder()
             .setCustomId("money")
             .setLabel("Nhập số tiền")
-            .setPlaceholder(
-              "Ví dụ: 50000"
-            )
+            .setPlaceholder("50000")
             .setRequired(true)
             .setStyle(
               TextInputStyle.Short
@@ -755,6 +769,7 @@ client.on(
           isNaN(amount) ||
           Number(amount) <= 0
         ) {
+
           return interaction.reply({
             content:
               "❌ Số tiền không hợp lệ",
@@ -767,13 +782,14 @@ client.on(
 
         const qrEmbed =
           new EmbedBuilder()
-            .setColor("#00d4ff")
-            .setTitle(
-              "💳 THANH TOÁN QR"
-            )
+
+            .setColor("#5865F2")
+
+            .setTitle("💳 THANH TOÁN QR")
+
             .setDescription(`
-🏦 Ngân hàng: ${BANK}
-💳 STK: ${STK}
+🏦 Bank: \`${BANK}\`
+💳 STK: \`${STK}\`
 
 💰 Số tiền:
 ## ${Number(
@@ -783,10 +799,11 @@ client.on(
 📝 Nội dung:
 \`${interaction.user.id}\`
 `)
+
             .setImage(qr)
+
             .setFooter({
-              text:
-                "NQK SHOP PREMIUM"
+              text: "NQK SHOP PREMIUM"
             });
 
         await interaction.reply({
@@ -797,9 +814,13 @@ client.on(
         // ===== ADMIN LOG =====
         const adminEmbed =
           new EmbedBuilder()
+
             .setColor("Yellow")
+
             .setTitle("📥 ĐƠN NẠP")
+
             .addFields(
+
               {
                 name: "👤 Người Nạp",
                 value: `${interaction.user.tag}`
@@ -814,14 +835,14 @@ client.on(
 
               {
                 name: "📌 Trạng Thái",
-                value:
-                  "⏳ Chờ duyệt"
+                value: "⏳ Chờ duyệt"
               }
             );
 
         const row =
           new ActionRowBuilder()
             .addComponents(
+
               new ButtonBuilder()
                 .setCustomId(
                   `accept_${interaction.user.id}_${amount}`
@@ -835,9 +856,7 @@ client.on(
                 .setCustomId(
                   `deny_${interaction.user.id}`
                 )
-                .setLabel(
-                  "❌ Từ Chối"
-                )
+                .setLabel("❌ Từ Chối")
                 .setStyle(
                   ButtonStyle.Danger
                 )
@@ -849,6 +868,7 @@ client.on(
           );
 
         if (logChannel) {
+
           await logChannel.send({
             embeds: [adminEmbed],
             components: [row]
@@ -869,6 +889,7 @@ client.on(
             process.env.ADMIN_ROLE
           )
         ) {
+
           return interaction.reply({
             content:
               "❌ Không có quyền",
@@ -920,20 +941,17 @@ client.on(
               new EmbedBuilder()
                 .setColor("#00ff88")
                 .setTitle(
-                  "✅ NẠP TIỀN THÀNH CÔNG"
+                  "☃️ NẠP TIỀN THÀNH CÔNG"
                 )
                 .setDescription(`
-💰 Đã cộng:
+💰 Đã nạp vào tài khoản:
 ## ${amount.toLocaleString()}₫
 `)
             ]
           });
 
         } catch (err) {
-          console.log(
-            "SEND USER ERROR:",
-            err
-          );
+          console.log(err);
         }
       }
 
@@ -950,6 +968,7 @@ client.on(
             process.env.ADMIN_ROLE
           )
         ) {
+
           return interaction.reply({
             content:
               "❌ Không có quyền",
@@ -1002,37 +1021,28 @@ client.on(
         }
 
       } catch (e) {
-        console.log(
-          "REPLY ERROR:",
-          e
-        );
+        console.log(e);
       }
     }
   }
 );
 
-// ================= ERROR HANDLER =================
+// ================= ERROR =================
 process.on(
   "unhandledRejection",
   err => {
-    console.log(
-      "UNHANDLED REJECTION:",
-      err
-    );
+    console.log(err);
   }
 );
 
 process.on(
   "uncaughtException",
   err => {
-    console.log(
-      "UNCAUGHT EXCEPTION:",
-      err
-    );
+    console.log(err);
   }
 );
 
 // ================= LOGIN =================
 client.login(process.env.TOKEN).catch(err => {
-  console.log("LOGIN ERROR:", err);
+  console.log(err);
 });
