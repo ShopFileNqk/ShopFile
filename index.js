@@ -225,30 +225,30 @@ function createShopEmbed() {
       {
         name: "🎮 𝔽𝕚𝕝𝕫𝕒 𝕚𝕆𝕊",
         value:
-`> 💠 𝟙 𝕆𝔹 • \90.000₫\
-> 👑 𝕍𝕚̃𝕟𝕙 𝕍𝕚𝕖̂̃𝕟 • \250.000₫\
-> 📦 𝔹𝕒́𝕟: \${stock.filza.sold}\
-> 📁 𝕂𝕙𝕠 ℂ𝕠̀𝕟: \`${stock.filza.remain}\`,
+`> 💠 𝟙 𝕆𝔹 ➭ 90.000₫
+> 👑 𝕍𝕚̃𝕟𝕙 𝕍𝕚𝕖̂̃𝕟 ➭ 250.000₫
+> 📦 𝔹𝕒́𝕟: ${stock.filza.sold}
+> 📁 𝕂𝕙𝕠 ℂ𝕠̀𝕟: ${stock.filza.remain}`,
         inline: true
       },
 
       {
         name: "🎯 𝕀𝕞𝕒𝕫𝕚𝕟𝕘 𝕚𝕆𝕊",
         value:
-`> 💠 𝟙 𝕆𝔹 • \100.000₫\
-> 👑 𝕍𝕚̃𝕟𝕙 𝕍𝕚𝕖̂̃𝕟 • \250.000₫\
-> 📦 𝔹𝕒́𝕟: \${stock.imazing.sold}\
-> 📁 𝕂𝕙𝕠 ℂ𝕠̀𝕟: \${stock.imazing.remain}\`,
+`> 💠 𝟙 𝕆𝔹 ➭ 100.000₫
+> 👑 𝕍𝕚̃𝕟𝕙 𝕍𝕚𝕖̂̃𝕟 ➭ 250.000₫
+> 📦 𝔹𝕒́𝕟: ${stock.imazing.sold}
+> 📁 𝕂𝕙𝕠 ℂ𝕠̀𝕟: ${stock.imazing.remain}`,
         inline: true
       },
 
       {
-        name: "🧩 𝔽𝕚𝕝𝕖 𝔸𝕕𝕣 [ ℝ𝕠𝕠𝕥 ],
+        name: "🧩 𝔽𝕚𝕝𝕖 𝔸𝕕𝕣 [ ℝ𝕠𝕠𝕥 ]",
         value:
-`> 💠 𝟙 𝕆𝔹 • \100.000₫\
-> 👑 𝕍𝕚̃𝕟𝕙 𝕍𝕚𝕖̂̃𝕟 • \250.000₫\
-> 📦 𝔹𝕒́𝕟: \${stock.adr.sold}\
-> 📁 𝕂𝕙𝕠 ℂ𝕠̀𝕟: \${stock.adr.remain}\`,
+`> 💠 𝟙 𝕆𝔹 ➭ 100.000₫
+> 👑 𝕍𝕚̃𝕟𝕙 𝕍𝕚𝕖̂̃𝕟 ➭ 250.000₫
+> 📦 𝔹𝕒́𝕟: ${stock.adr.sold}
+> 📁 𝕂𝕙𝕠 ℂ𝕠̀𝕟: ${stock.adr.remain}`,
         inline: true
       },
 
