@@ -136,14 +136,14 @@ const products = {
     prices: {
 
       ob: {
-        price: 50000,
+        price: 90000,
         label: "1 OB",
         role: "1502261658351833210",
         channel: "1502262765568528527"
       },
 
       vv: {
-        price: 150000,
+        price: 250000,
         label: "Vĩnh Viễn",
         role: "1502261775922368552",
         channel: "1502262825308131471"
@@ -157,14 +157,14 @@ const products = {
     prices: {
 
       ob: {
-        price: 70000,
+        price: 100000,
         label: "1 OB",
         role: "1502285054314024990",
         channel: "1502280881082208447"
       },
 
       vv: {
-        price: 150000,
+        price: 250000,
         label: "Vĩnh Viễn",
         role: "1502285135964537024",
         channel: "1502280903739572415"
@@ -206,57 +206,57 @@ function createShopEmbed() {
     .setColor("#5865F2")
 
     .setAuthor({
-      name: "NQK SHOP PREMIUM",
+      name: "𝗦𝗛𝗢𝗣 𝗙𝗜𝗟𝗘 𝗣𝗥𝗘𝗠𝗜𝗨𝗠",
       iconURL: THUMBNAIL
     })
 
-    .setTitle("🛒 STORE FILE • AUTO 24/7")
+    .setTitle("🛒 𝗧𝗮̂́𝘁 𝗰𝗮̉ 𝗙𝗶𝗹𝗲 𝗿𝗮̂́𝘁 𝗫𝗶̣𝗻 𝘃𝗮̀ 𝗔𝗻𝘁𝗶𝗕𝗮𝗻")
 
     .setDescription(`
 ╭─────────────⭓
-> ⚡ Mua file tự động
-> 💎 AntiBan cực cao
-> 🚀 Hỗ trợ nhanh • Online 24/7
+> 🎰 𝐌𝐮𝐚 𝐟𝐢𝐥𝐞 𝐭𝐮̛̣ 𝐝̵𝐨̣̂𝐧𝐠
+> 🖇 𝐀𝐧𝐭𝐢𝐁𝐚𝐧 𝐜𝐮̛̣𝐜 𝐜𝐚𝐨
+> 🚀 𝐇𝐨̂̃ 𝐭𝐫𝐨̛̣ 𝐧𝐡𝐚𝐧𝐡 • 𝐎𝐧𝐥𝐢𝐧𝐞 𝟐𝟒/𝟕
 ╰─────────────⭓
 `)
 
     .addFields(
 
       {
-        name: "🔥 FILZA IOS",
+        name: "🎮 𝔽𝕚𝕝𝕫𝕒 𝕚𝕆𝕊",
         value:
-`> 💠 1 OB • \`50.000₫\`
-> 👑 VV • \`150.000₫\`
-> 📦 Sold: \`${stock.filza.sold}\`
-> 📁 Stock: \`${stock.filza.remain}\``,
+`> 💠 𝟙 𝕆𝔹 • \90.000₫\
+> 👑 𝕍𝕚̃𝕟𝕙 𝕍𝕚𝕖̂̃𝕟 • \250.000₫\
+> 📦 𝔹𝕒́𝕟: \${stock.filza.sold}\
+> 📁 𝕂𝕙𝕠 ℂ𝕠̀𝕟: \`${stock.filza.remain}\`,
         inline: true
       },
 
       {
-        name: "💎 IMAZING IOS",
+        name: "🎯 𝕀𝕞𝕒𝕫𝕚𝕟𝕘 𝕚𝕆𝕊",
         value:
-`> 💠 1 OB • \`70.000₫\`
-> 👑 VV • \`150.000₫\`
-> 📦 Sold: \`${stock.imazing.sold}\`
-> 📁 Stock: \`${stock.imazing.remain}\``,
+`> 💠 𝟙 𝕆𝔹 • \100.000₫\
+> 👑 𝕍𝕚̃𝕟𝕙 𝕍𝕚𝕖̂̃𝕟 • \250.000₫\
+> 📦 𝔹𝕒́𝕟: \${stock.imazing.sold}\
+> 📁 𝕂𝕙𝕠 ℂ𝕠̀𝕟: \${stock.imazing.remain}\`,
         inline: true
       },
 
       {
-        name: "⚡ FILE ADR ROOT",
+        name: "🧩 𝔽𝕚𝕝𝕖 𝔸𝕕𝕣 [ ℝ𝕠𝕠𝕥 ],
         value:
-`> 💠 1 OB • \`100.000₫\`
-> 👑 VV • \`250.000₫\`
-> 📦 Sold: \`${stock.adr.sold}\`
-> 📁 Stock: \`${stock.adr.remain}\``,
+`> 💠 𝟙 𝕆𝔹 • \100.000₫\
+> 👑 𝕍𝕚̃𝕟𝕙 𝕍𝕚𝕖̂̃𝕟 • \250.000₫\
+> 📦 𝔹𝕒́𝕟: \${stock.adr.sold}\
+> 📁 𝕂𝕙𝕠 ℂ𝕠̀𝕟: \${stock.adr.remain}\`,
         inline: true
       },
 
       {
-        name: "━━━━━━━━━━━ 💳 PAYMENT",
+        name: "━━━━━━━━━━━ 📁 𝗧𝗵𝗼̂𝗻𝗴 𝗧𝗶𝗻",
         value:
-`> 📩 Nhận file qua DM
-> 🟢 Hệ thống hoạt động ổn định`,
+`> 📩 𝐍𝐡𝐚̣̂𝐧 𝐟𝐢𝐥𝐞 𝐪𝐮𝐚 𝐃𝐌
+> 🟢 𝐇𝐞̣̂ 𝐭𝐡𝐨̂́𝐧𝐠 𝐡𝐨𝐚̣𝐭 𝐝̵𝐨̣̂𝐧𝐠 𝟐𝟒/𝟕`,
         inline: false
       }
     )
@@ -266,7 +266,7 @@ function createShopEmbed() {
     .setImage(IMAGE)
 
     .setFooter({
-      text: "NQK SHOP PREMIUM • FILE IOS/ADR"
+      text: "𝗕𝗼𝘁 𝗖𝗿𝗲𝗮𝘁𝗲 𝗕𝘆 𝗤.𝗞𝗵𝗮́𝗻𝗵"
     })
 
     .setTimestamp();
@@ -389,21 +389,21 @@ client.on(
             .setPlaceholder("📦 Chọn sản phẩm")
             .addOptions([
               {
-                label: "Filza iOS",
+                label: "𝗙𝗶𝗹𝘇𝗮",
                 value: "filza",
-                emoji: "🔥"
+                emoji: "🎮"
               },
 
               {
-                label: "iMazing",
+                label: "𝗜𝗺𝗮𝘇𝗶𝗻𝗴",
                 value: "imazing",
-                emoji: "💎"
+                emoji: "🎯"
               },
 
               {
-                label: "File ADR",
+                label: "𝗔𝗻𝗱𝗿𝗼𝗶",
                 value: "adr",
-                emoji: "⚡"
+                emoji: "🧩"
               }
             ]);
 
@@ -430,7 +430,7 @@ client.on(
         const menu =
           new StringSelectMenuBuilder()
             .setCustomId(`price_${productKey}`)
-            .setPlaceholder("💎 Chọn gói")
+            .setPlaceholder("📥 Chọn Thời Hạn")
             .addOptions(
               Object.entries(product.prices).map(
                 ([key, data]) => ({
@@ -509,7 +509,7 @@ client.on(
               new EmbedBuilder()
                 .setColor("Red")
                 .setTitle(
-                  "❌ Số dư không đủ"
+                  "💸 Số dư không đủ"
                 )
                 .setDescription(`
 💰 Số dư hiện tại của bạn:
