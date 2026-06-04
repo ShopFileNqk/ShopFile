@@ -136,14 +136,14 @@ const products = {
     prices: {
 
       ob: {
-        price: 90000,
+        price: 70000,
         label: "1 OB",
         role: "1502261658351833210",
         channel: "1502262765568528527"
       },
 
       vv: {
-        price: 250000,
+        price: 150000,
         label: "Vĩnh Viễn",
         role: "1502261775922368552",
         channel: "1502262825308131471"
@@ -157,14 +157,14 @@ const products = {
     prices: {
 
       ob: {
-        price: 100000,
+        price: 70000,
         label: "1 OB",
         role: "1502285054314024990",
         channel: "1502280881082208447"
       },
 
       vv: {
-        price: 250000,
+        price: 150000,
         label: "Vĩnh Viễn",
         role: "1502285135964537024",
         channel: "1502280903739572415"
@@ -178,14 +178,14 @@ const products = {
     prices: {
 
       ob: {
-        price: 100000,
+        price: 70000,
         label: "1 OB",
         role: "1502285208097915001",
         channel: "1502267573465513994"
       },
 
       vv: {
-        price: 250000,
+        price: 200000,
         label: "Vĩnh Viễn",
         role: "1502285273990697070",
         channel: "1502267673428496424"
@@ -225,8 +225,8 @@ function createShopEmbed() {
       {
         name: "🎮 𝔽𝕚𝕝𝕫𝕒 𝕚𝕆𝕊",
         value:
-`> 💠 𝟙 𝕆𝔹 ➭ 90.000₫
-> 👑 𝕍𝕚̃𝕟𝕙 𝕍𝕚𝕖̂̃𝕟 ➭ 250.000₫
+`> 💠 𝟙 𝕆𝔹 ➭ 𝟟𝟘.𝟘𝟘𝟘
+> 👑 𝕍𝕚̃𝕟𝕙 𝕍𝕚𝕖̂̃𝕟 ➭ 𝟙𝟝𝟘.𝟘𝟘𝟘
 > 📦 𝔹𝕒́𝕟: ${stock.filza.sold}
 > 📁 𝕂𝕙𝕠 ℂ𝕠̀𝕟: ${stock.filza.remain}`,
         inline: true
@@ -235,8 +235,8 @@ function createShopEmbed() {
       {
         name: "🎯 𝕀𝕞𝕒𝕫𝕚𝕟𝕘 𝕚𝕆𝕊",
         value:
-`> 💠 𝟙 𝕆𝔹 ➭ 100.000₫
-> 👑 𝕍𝕚̃𝕟𝕙 𝕍𝕚𝕖̂̃𝕟 ➭ 250.000₫
+`> 💠 𝟙 𝕆𝔹 ➭ 𝟟𝟘.𝟘𝟘𝟘
+> 👑 𝕍𝕚̃𝕟𝕙 𝕍𝕚𝕖̂̃𝕟 ➭ 𝟙𝟝𝟘.𝟘𝟘𝟘
 > 📦 𝔹𝕒́𝕟: ${stock.imazing.sold}
 > 📁 𝕂𝕙𝕠 ℂ𝕠̀𝕟: ${stock.imazing.remain}`,
         inline: true
@@ -245,8 +245,8 @@ function createShopEmbed() {
       {
         name: "🧩 𝔽𝕚𝕝𝕖 𝔸𝕕𝕣 [ ℝ𝕠𝕠𝕥 ]",
         value:
-`> 💠 𝟙 𝕆𝔹 ➭ 100.000₫
-> 👑 𝕍𝕚̃𝕟𝕙 𝕍𝕚𝕖̂̃𝕟 ➭ 250.000₫
+`> 💠 𝟙 𝕆𝔹 ➭ 𝟟𝟘.𝟘𝟘𝟘
+> 👑 𝕍𝕚̃𝕟𝕙 𝕍𝕚𝕖̂̃𝕟 ➭ 𝟚𝟘𝟘.𝟘𝟘𝟘
 > 📦 𝔹𝕒́𝕟: ${stock.adr.sold}
 > 📁 𝕂𝕙𝕠 ℂ𝕠̀𝕟: ${stock.adr.remain}`,
         inline: true
